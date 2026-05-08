@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FN_INTERNAL // GLOBAL_OPS</title>
+    <title>FN_INTERNAL // CORE_V11</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 
@@ -10,7 +10,6 @@
             --fn-blue: #2183fb;
             --fn-yellow: #f8fd25;
             --fn-red: #ff4141;
-            --fn-purple: #a136f1;
             --status-green: #4caf50;
             --slant: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
         }
@@ -21,7 +20,6 @@
             height: 100vh; overflow: hidden;
         }
 
-        /* Header & Stats */
         header {
             background: rgba(0, 0, 0, 0.95); display: flex; align-items: center;
             padding: 0 30px; border-bottom: 4px solid var(--fn-blue); height: 75px;
@@ -32,326 +30,263 @@
         .stat-val { color: var(--fn-yellow); font-size: 1.2rem; display: block; }
         .stat-lbl { font-size: 0.6rem; color: #888; }
 
-        /* Nav */
         .nav-tab {
-            background: #222; padding: 8px 18px; clip-path: var(--slant);
-            cursor: pointer; border: none; color: #666; font-family: 'Anton'; margin: 0 3px;
+            background: #222; padding: 8px 15px; clip-path: var(--slant);
+            cursor: pointer; border: none; color: #888; font-family: 'Anton'; margin: 0 2px;
         }
         .nav-tab.active { background: var(--fn-blue); color: white; }
 
-        .container { padding: 20px; height: calc(100vh - 100px); overflow: hidden; }
+        .container { padding: 20px; height: calc(100vh - 100px); }
 
         /* Server Toggle */
-        .status-toggle {
-            display: flex; align-items: center; gap: 10px;
-            padding: 5px 15px; background: #111; border: 1px solid #333; cursor: pointer;
-        }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--status-green); }
-        .status-critical .status-dot { background: var(--fn-red); box-shadow: 0 0 10px var(--fn-red); }
+        .status-toggle { display: flex; align-items: center; gap: 10px; padding: 10px; background: #111; cursor: pointer; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--status-green); }
+        .offline .status-dot { background: var(--fn-red); box-shadow: 0 0 10px var(--fn-red); }
 
-        /* Gifting View */
-        .gift-container { display: grid; grid-template-columns: 1fr 350px; gap: 20px; height: 100%; }
-        .asset-search-area { background: rgba(0,0,0,0.4); padding: 15px; overflow-y: auto; }
-        .grid-assets { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
-        .asset-card { background: #000; border: 1px solid #333; padding: 5px; cursor: pointer; }
-        .asset-card:hover { border-color: var(--fn-yellow); }
-        .asset-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
-
-        /* Match Logs */
-        .log-feed { background: #000; border: 1px solid #222; height: 75vh; overflow-y: auto; font-family: monospace; padding: 10px; font-size: 0.8rem; }
-        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #111; padding: 5px 0; }
-        .log-active { color: var(--status-green); }
-        .log-inactive { color: #555; }
-
-        /* Notifications (Custom Popups) */
-        #notification-box {
-            position: fixed; bottom: 20px; right: 20px; z-index: 2000;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .toast {
-            background: var(--fn-blue); color: white; padding: 15px 25px;
-            clip-path: var(--slant); animation: slideIn 0.3s ease;
-            min-width: 250px; border-left: 5px solid var(--fn-yellow);
-        }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
-        /* Modal Overlay */
-        .modal-overlay {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1500;
-        }
-        .modal { background: #12284c; border: 4px solid var(--fn-blue); width: 400px; padding: 30px; text-align: center; }
-        input { width: 100%; margin: 10px 0; padding: 12px; background: #000; color: white; border: 1px solid var(--fn-blue); box-sizing: border-box; }
+        /* Grids & Feeds */
+        .feed { background: rgba(0,0,0,0.6); border: 1px solid #222; height: 70vh; overflow-y: auto; padding: 10px; font-family: monospace; }
+        .log-entry { padding: 8px; border-bottom: 1px solid #111; font-size: 0.85rem; }
         
-        .btn-prime { background: var(--fn-yellow); color: #000; border: none; padding: 10px 20px; clip-path: var(--slant); cursor: pointer; font-family: 'Anton'; width: 100%; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; height: 100%; }
+
+        /* Notifications */
+        #notify-wrap { position: fixed; bottom: 20px; left: 20px; z-index: 9999; }
+        .toast { background: var(--fn-blue); padding: 15px; margin-top: 10px; clip-path: var(--slant); border-left: 5px solid var(--fn-yellow); animation: pop 0.3s ease; }
+        @keyframes pop { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+        /* Gift Panel */
+        .gift-box { background: #000; border: 2px solid var(--fn-blue); padding: 20px; }
+        input, select { width: 100%; margin: 8px 0; padding: 12px; background: #111; color: white; border: 1px solid #333; box-sizing: border-box; }
+        .btn-prime { background: var(--fn-yellow); color: #000; padding: 10px; width: 100%; border: none; cursor: pointer; font-family: 'Anton'; clip-path: var(--slant); }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="display: flex; align-items: center;">
-        <div class="stat-box">
-            <span class="stat-lbl">LIVE PLAYERS</span>
-            <span class="stat-val" id="live-count">1,402,256</span>
-        </div>
-        <div class="stat-box" style="border:none;">
-            <div id="server-toggle" class="status-toggle" onclick="toggleServer()">
-                <div class="status-dot"></div>
-                <span id="status-text">SYSTEMS: OPERATIONAL</span>
-            </div>
+    <div style="display: flex;">
+        <div class="stat-box"><span class="stat-lbl">LIVE PLAYERS</span><span class="stat-val" id="player-count">1,245,000</span></div>
+        <div id="server-btn" class="status-toggle" onclick="toggleServer()">
+            <div class="status-dot"></div>
+            <span id="server-text">SERVERS: ONLINE</span>
         </div>
     </div>
-
     <nav>
-        <button class="nav-tab active" onclick="switchTab('reports')">Reports</button>
-        <button class="nav-tab" onclick="switchTab('gift')">Gift Center</button>
-        <button class="nav-tab" onclick="switchTab('logs')">Match Logs</button>
+        <button class="nav-tab active" onclick="switchTab('ops')">Operations</button>
+        <button class="nav-tab" onclick="switchTab('gift')">Economy/Gift</button>
         <button class="nav-tab" onclick="switchTab('tournaments')">Tournaments</button>
+        <button class="nav-tab" onclick="switchTab('support')">Support Tix</button>
     </nav>
-
-    <div style="font-size: 0.8rem; letter-spacing: 1px;">AUTH: <span style="color:var(--fn-blue)">SUP_ADMIN_99</span></div>
+    <div style="font-size: 0.7rem; color: #555;">ENVIRONMENT: PRODUCTION_LIVE</div>
 </header>
 
 <div class="container">
-    <div id="view-reports">
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <h2 style="color:var(--fn-red)">Global Reports (Real-time)</h2>
-            <button class="nav-tab" style="background:#444; color:white;" onclick="undoAction()">Undo Last</button>
+    <div id="view-ops" class="grid-3">
+        <div>
+            <h3 style="color:var(--fn-red)">Live Reports</h3>
+            <div class="feed" id="report-feed"></div>
         </div>
-        <div class="log-feed" id="report-container" style="height: 70vh; background: rgba(0,0,0,0.5);"></div>
+        <div style="grid-column: span 2;">
+            <h3>Active Match Instances</h3>
+            <div class="feed" id="match-feed"></div>
+        </div>
     </div>
 
     <div id="view-gift" style="display:none;">
-        <div class="gift-container">
-            <div class="asset-search-area">
-                <input type="text" id="gift-search" placeholder="SEARCH COSMETIC DATABASE..." onkeyup="searchGifts()">
-                <div class="grid-assets" id="gift-grid"></div>
-            </div>
-            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-left: 2px solid var(--fn-yellow);">
+        <div class="grid-3">
+            <div class="gift-box">
                 <h3>Gift Protocol</h3>
-                <label>Target Username</label>
-                <input type="text" id="gift-target" placeholder="Recipient (e.g. TZ_Ryz)">
-                <label>Message (Optional)</label>
-                <input type="text" id="gift-msg" placeholder="Enjoy the skin!">
-                <div id="selected-preview" style="margin: 20px 0; background: #000; padding: 10px; border: 1px dashed #555;">
-                    No Item Selected
+                <input type="text" id="g-user" placeholder="Recipient Username">
+                <select id="g-type" onchange="toggleGiftType()">
+                    <option value="item">Cosmetic Item</option>
+                    <option value="vbucks">V-Bucks Currency</option>
+                </select>
+                <div id="item-search-wrap">
+                    <input type="text" id="g-item" placeholder="Search Item Name...">
                 </div>
-                <button class="btn-prime" onclick="processGift()">SEND GIFT</button>
+                <div id="vbuck-wrap" style="display:none;">
+                    <select id="g-vbucks">
+                        <option value="1000">1,000 V-Bucks</option>
+                        <option value="2800">2,800 V-Bucks</option>
+                        <option value="5000">5,000 V-Bucks</option>
+                        <option value="13500">13,500 V-Bucks</option>
+                    </select>
+                </div>
+                <button class="btn-prime" onclick="sendGift()">Execute Transfer</button>
             </div>
         </div>
     </div>
 
-    <div id="view-logs" style="display:none;">
-        <h2 style="color:var(--fn-blue)">Match Activity Logs</h2>
-        <div class="log-feed" id="match-logs"></div>
-    </div>
-
     <div id="view-tournaments" style="display:none;">
-        <button class="btn-prime" style="width: auto; margin-bottom: 20px;" onclick="showModal('tourneyModal')">Create Tournament</button>
-        <div class="grid-assets" id="tourney-grid"></div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button class="btn-prime" style="width:auto" onclick="fetchFullTourneys()">Fetch All Official Events</button>
+            <button class="btn-prime" style="width:auto; background:var(--fn-blue); color:white;" onclick="showAddTourney()">Add Custom Event</button>
+        </div>
+        <div id="tourney-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; overflow-y:auto; height:70vh;"></div>
+    </div>
+
+    <div id="view-support" style="display:none;">
+        <h3>Open Help Tickets</h3>
+        <div class="feed" id="support-feed"></div>
     </div>
 </div>
 
-<div id="tourneyModal" class="modal-overlay">
-    <div class="modal">
-        <h3>Publish Competitive Event</h3>
-        <input type="text" id="t-name" placeholder="Tournament Name">
-        <input type="text" id="t-reward" placeholder="Reward (V-Bucks/Prizes)">
-        <input type="text" id="t-img" placeholder="Banner URL">
-        <button class="btn-prime" onclick="addTournament()">PUBLISH</button>
-        <button onclick="hideModal('tourneyModal')" style="background:none; border:none; color:red; cursor:pointer; margin-top:10px;">CANCEL</button>
-    </div>
-</div>
-
-<div id="notification-box"></div>
+<div id="notify-wrap"></div>
 
 <script>
+    let isOnline = true;
+    let playerCount = 1245000;
     let reports = [];
-    let history = [];
-    let allAssets = [];
-    let selectedAsset = null;
-    let tourneys = JSON.parse(localStorage.getItem('v10_tourneys')) || [];
+    let matchInterval, playerInterval, reportInterval;
 
-    // --- Tab System ---
+    // --- Tab Switching ---
     function switchTab(v) {
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
-        ['reports','gift','logs','tournaments'].forEach(id => {
-            document.getElementById('view-'+id).style.display = (id === v) ? 'block' : 'none';
+        ['ops','gift','tournaments','support'].forEach(id => {
+            document.getElementById('view-'+id).style.display = (id === v) ? (id==='ops'?'grid':'block') : 'none';
         });
-        if(v === 'gift' && allAssets.length === 0) fetchAssets();
-        if(v === 'logs') populateLogs();
+        if(v === 'tournaments') fetchFullTourneys();
+        if(v === 'support') generateSupport();
     }
 
-    // --- Real-time Player Count (Live 2026 Sim) ---
-    function updatePlayerCount() {
-        const base = 1350000;
-        const drift = Math.floor(Math.random() * 50000);
-        document.getElementById('live-count').innerText = (base + drift).toLocaleString();
-        setTimeout(updatePlayerCount, 3000);
-    }
-
-    // --- Server Toggle ---
+    // --- Server Logic ---
     function toggleServer() {
-        const el = document.getElementById('server-toggle');
-        const txt = document.getElementById('status-text');
-        if(el.classList.contains('status-critical')) {
-            el.classList.remove('status-critical');
-            txt.innerText = "SYSTEMS: OPERATIONAL";
-            notify("All services restored to OPERATIONAL.");
-        } else {
-            el.classList.add('status-critical');
-            txt.innerText = "SYSTEMS: CRITICAL OUTAGE";
-            notify("Emergency: Triggering global server downtime.");
-        }
-    }
-
-    // --- Custom Notifications (No Alert!) ---
-    function notify(msg) {
-        const box = document.getElementById('notification-box');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerText = msg;
-        box.appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
-    }
-
-    // --- Gifting System ---
-    async function fetchAssets() {
-        const res = await fetch('https://fortnite-api.com/v2/cosmetics/br');
-        const json = await res.json();
-        allAssets = json.data;
-        renderAssets(allAssets.slice(0, 48));
-    }
-
-    function renderAssets(items) {
-        const grid = document.getElementById('gift-grid');
-        grid.innerHTML = items.map(item => `
-            <div class="asset-card" onclick="selectItem('${item.id}', '${item.name}', '${item.images.icon}')">
-                <img src="${item.images.icon}">
-                <p style="font-size:0.6rem; text-align:center;">${item.name}</p>
-            </div>
-        `).join('');
-    }
-
-    function selectItem(id, name, img) {
-        selectedAsset = {id, name, img};
-        document.getElementById('selected-preview').innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px;">
-                <img src="${img}" style="width:50px;">
-                <span>${name}</span>
-            </div>
-        `;
-    }
-
-    function processGift() {
-        const target = document.getElementById('gift-target').value;
-        if(!target || !selectedAsset) return notify("Error: Missing target or item selection.");
-        notify(`GIFT SUCCESS: Sent ${selectedAsset.name} to ${target}.`);
-        document.getElementById('gift-target').value = "";
-    }
-
-    function searchGifts() {
-        const val = document.getElementById('gift-search').value.toLowerCase();
-        const filtered = allAssets.filter(a => a.name.toLowerCase().includes(val)).slice(0, 48);
-        renderAssets(filtered);
-    }
-
-    // --- Match Logs ---
-    function populateLogs() {
-        const logs = document.getElementById('match-logs');
-        const prefixes = ["EU_", "NAW_", "ASIA_"];
-        const gameModes = ["Solo", "Duo", "Arena", "Ranked ZB"];
+        isOnline = !isOnline;
+        const btn = document.getElementById('server-btn');
+        const txt = document.getElementById('server-text');
         
-        let html = "";
-        for(let i=0; i<30; i++) {
-            const isActive = Math.random() > 0.3;
-            html += `
-                <div class="log-entry">
-                    <span class="${isActive ? 'log-active' : 'log-inactive'}">${isActive ? '[ACTIVE]' : '[INACTIVE]'}</span>
-                    MatchID: ${Math.floor(Math.random()*999999)} | 
-                    Server: ${prefixes[Math.floor(Math.random()*3)]}${Math.floor(Math.random()*100)} | 
-                    Mode: ${gameModes[Math.floor(Math.random()*4)]} | 
-                    Players: ${Math.floor(Math.random()*100)}/100
-                </div>
-            `;
+        if(!isOnline) {
+            btn.classList.add('offline');
+            txt.innerText = "SERVERS: OFFLINE";
+            notify("CRITICAL: Server shutdown initiated.");
+            clearTimeout(reportInterval);
+            document.getElementById('match-feed').innerHTML = "<div style='color:red; padding:20px;'>NO ACTIVE MATCHES - SERVERS OFFLINE</div>";
+        } else {
+            notify("RECOVERY: Servers coming back online in 6s...");
+            setTimeout(() => {
+                btn.classList.remove('offline');
+                txt.innerText = "SERVERS: ONLINE";
+                notify("All systems operational.");
+                startFeeds();
+            }, 6000);
         }
-        logs.innerHTML = html;
     }
 
-    // --- Reports ---
-    const sweatyNames = ["v_Shifted", "TZ_Ryz", "Not_Aqua", "Cold_Logic", "Snypr_cc", "Faded_v"];
-    function generateReport() {
-        const name = sweatyNames[Math.floor(Math.random()*sweatyNames.length)] + "_" + Math.floor(Math.random()*99);
-        const report = {
-            id: Date.now(),
-            user: name,
-            reason: ["Aimbot", "Wallhack", "Griefing"][Math.floor(Math.random()*3)],
-            time: new Date().toLocaleTimeString()
-        };
-        reports.unshift(report);
-        if(reports.length > 20) reports.pop();
-        renderReports();
-        setTimeout(generateReport, Math.random() * 4000 + 1000);
+    // --- Player Count Logic ---
+    function updatePlayers() {
+        const display = document.getElementById('player-count');
+        if(!isOnline) {
+            playerCount = Math.max(0, playerCount - Math.floor(Math.random() * 80000 + 20000));
+        } else {
+            if(playerCount < 1000000) {
+                playerCount += Math.floor(Math.random() * 150000 + 50000);
+            } else {
+                playerCount += Math.floor(Math.random() * 10000 - 5000);
+            }
+        }
+        display.innerText = playerCount.toLocaleString();
+        setTimeout(updatePlayers, 1000);
     }
 
-    function renderReports() {
-        const cont = document.getElementById('report-container');
-        cont.innerHTML = reports.map(r => `
-            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 200px; padding:10px; border-bottom:1px solid #222;">
-                <span>${r.time}</span>
-                <span style="color:var(--fn-yellow)">${r.user}</span>
-                <span style="color:var(--fn-red)">${r.reason}</span>
-                <button class="btn-prime" style="font-size:0.7rem; padding:4px;" onclick="banUser(${r.id})">BAN USER</button>
+    // --- Feeds (Reports / Matches) ---
+    function startFeeds() {
+        if(!isOnline) return;
+
+        // Reports
+        const names = ["v_Shifted", "TZ_Ryz", "Not_Aqua", "Cold_Logic", "Lxsh_cc", "Faded_v"];
+        const rFeed = document.getElementById('report-feed');
+        const report = `
+            <div class="log-entry">
+                <span style="color:var(--fn-red)">[REPORT]</span> ${names[Math.floor(Math.random()*names.length)]} -> 
+                ${["Aimbot", "Teaming", "Griefing"][Math.floor(Math.random()*3)]}
+            </div>`;
+        rFeed.insertAdjacentHTML('afterbegin', report);
+        
+        // Matches (Active Only)
+        const mFeed = document.getElementById('match-feed');
+        const modes = ["Ranked Solo", "Zero Build Squads", "Creative 2.0", "Ranked Duos", "Reload"];
+        const match = `
+            <div class="log-entry">
+                <span style="color:var(--status-green)">[LIVE]</span> 
+                ID: ${Math.floor(Math.random()*99999)} | Mode: ${modes[Math.floor(Math.random()*5)]} | 
+                Players: ${Math.floor(Math.random()*20+80)}/100
+            </div>`;
+        mFeed.insertAdjacentHTML('afterbegin', match);
+        if(mFeed.children.length > 20) mFeed.lastChild.remove();
+
+        reportInterval = setTimeout(startFeeds, Math.random() * 3000 + 1000);
+    }
+
+    // --- Support Tickets ---
+    function generateSupport() {
+        const feed = document.getElementById('support-feed');
+        const issues = [
+            "My V-Bucks didn't show up after purchase!",
+            "How do I join the FNCS Open Qualifiers?",
+            "Someone is using a glitch in Creative.",
+            "I accidentally bought a skin, can I refund?",
+            "The game keeps crashing on my PS5."
+        ];
+        feed.innerHTML = issues.map(issue => `
+            <div class="log-entry" style="border-left: 3px solid var(--fn-blue)">
+                <strong style="color:var(--fn-blue)">USER_${Math.floor(Math.random()*999)}:</strong> ${issue}
+                <br><button onclick="this.parentElement.remove()" style="background:none; border:none; color:var(--status-green); cursor:pointer; padding:0;">[RESOLVE TICKET]</button>
             </div>
         `).join('');
     }
 
-    function banUser(id) {
-        const idx = reports.findIndex(r => r.id === id);
-        history.push({index: idx, data: reports[idx]});
-        reports.splice(idx, 1);
-        renderReports();
-        notify("Account Access Revoked Successfully.");
-    }
-
-    function undoAction() {
-        if(history.length === 0) return notify("Nothing to undo.");
-        const last = history.pop();
-        reports.splice(last.index, 0, last.data);
-        renderReports();
-    }
-
-    // --- Tournaments ---
-    function renderTourneys() {
+    // --- Tournaments (Full Fetch) ---
+    async function fetchFullTourneys() {
+        const res = await fetch('https://fortnite-api.com/v2/news/br');
+        const data = await res.json();
         const grid = document.getElementById('tourney-grid');
-        grid.innerHTML = tourneys.map(t => `
-            <div style="background:#000; border:2px solid var(--fn-blue); position:relative;">
-                <div style="background:var(--fn-yellow); color:black; padding:2px 10px; position:absolute; top:5px; right:5px;">${t.reward}</div>
-                <img src="${t.img || 'https://placehold.co/600x300/000/fff?text=COMPETITIVE'}" style="width:100%;">
-                <div style="padding:10px;">${t.name}</div>
+        // Filter news for anything competitive
+        const items = data.data.motds;
+        grid.innerHTML = items.map(t => `
+            <div style="background:#000; border:1px solid var(--fn-blue);">
+                <img src="${t.image}" style="width:100%">
+                <div style="padding:10px; font-size:0.8rem;">
+                    <div style="color:var(--fn-yellow)">PRIZE: $${Math.floor(Math.random()*10000+1000)}</div>
+                    ${t.title}
+                </div>
             </div>
         `).join('');
     }
 
-    function addTournament() {
-        const name = document.getElementById('t-name').value;
-        const reward = document.getElementById('t-reward').value;
-        const img = document.getElementById('t-img').value;
-        tourneys.unshift({name, reward, img});
-        localStorage.setItem('v10_tourneys', JSON.stringify(tourneys));
-        renderTourneys();
-        hideModal('tourneyModal');
-        notify(`TOURNAMENT PUBLISHED: ${name}`);
+    // --- Gifting Logic ---
+    function toggleGiftType() {
+        const type = document.getElementById('g-type').value;
+        document.getElementById('item-search-wrap').style.display = type === 'item' ? 'block' : 'none';
+        document.getElementById('vbuck-wrap').style.display = type === 'vbucks' ? 'block' : 'none';
     }
 
-    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
+    function sendGift() {
+        const user = document.getElementById('g-user').value;
+        const type = document.getElementById('g-type').value;
+        if(!user) return notify("Error: No recipient target.");
+        
+        if(type === 'vbucks') {
+            const amt = document.getElementById('g-vbucks').value;
+            notify(`SUCCESS: ${amt} V-Bucks granted to ${user}.`);
+        } else {
+            const item = document.getElementById('g-item').value;
+            notify(`SUCCESS: ${item} gifted to ${user}.`);
+        }
+    }
+
+    function notify(msg) {
+        const wrap = document.getElementById('notify-wrap');
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.innerText = msg;
+        wrap.appendChild(t);
+        setTimeout(() => t.remove(), 4000);
+    }
 
     // Init
-    updatePlayerCount();
-    generateReport();
-    renderTourneys();
+    updatePlayers();
+    startFeeds();
 </script>
+
 </body>
 </html>
