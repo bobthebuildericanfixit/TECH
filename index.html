@@ -2,212 +2,274 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fortnite OG | Admin Command Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortnite OG Admin Panel</title>
     <style>
+        /* Import a heavy font for that Fortnite look */
+        @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+
         :root {
-            --fortnite-yellow: #f8fd25;
-            --fortnite-blue: #2183fb;
-            --fortnite-dark-blue: #12284c;
-            --og-gradient: linear-gradient(180deg, #163a75 0%, #0d1e3d 100%);
-            --button-slant: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+            --fn-blue: #2183fb;
+            --fn-yellow: #f8fd25;
+            --fn-gray: #313131;
+            --bg-gradient: radial-gradient(circle, #163a75 0%, #061021 100%);
+            --slant: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
         }
 
         body {
             margin: 0;
-            font-family: "Arial Black", sans-serif;
-            background: var(--og-gradient);
+            padding: 0;
+            background: var(--bg-gradient);
+            font-family: 'Anton', sans-serif; /* Closest to Burbank */
             color: white;
             height: 100vh;
             overflow: hidden;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* OG Top Navigation */
+        /* Top Navigation Bar */
         header {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
-            padding: 10px 50px;
-            gap: 20px;
-            border-bottom: 3px solid var(--fortnite-blue);
+            align-items: center;
+            padding: 10px 40px;
+            border-bottom: 4px solid var(--fn-blue);
+            gap: 15px;
         }
 
-        .nav-btn {
-            background: #333;
-            padding: 10px 30px;
-            clip-path: var(--button-slant);
+        .nav-tab {
+            background: var(--fn-gray);
+            padding: 8px 35px;
+            clip-path: var(--slant);
             cursor: pointer;
             border: none;
-            color: #ccc;
-            font-weight: bold;
-            transition: 0.2s;
+            color: #888;
+            transition: 0.2s ease;
         }
 
-        .nav-btn.active {
-            background: var(--fortnite-blue);
+        .nav-tab.active {
+            background: var(--fn-blue);
             color: white;
-            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(33, 131, 251, 0.5);
         }
 
-        /* Main Content Area */
-        main {
+        /* Main Workspace */
+        .container {
             padding: 40px;
-            height: calc(100vh - 80px);
-            overflow-y: auto;
         }
 
-        .admin-controls {
+        .admin-row {
             display: flex;
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
-        .action-btn {
-            background: var(--fortnite-yellow);
-            color: black;
-            padding: 15px 30px;
+        .btn-action {
+            background: var(--fn-yellow);
+            color: #000;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            clip-path: var(--slant);
             border: none;
-            font-weight: 900;
-            clip-path: var(--button-slant);
             cursor: pointer;
+            transition: transform 0.1s;
         }
 
-        /* News Cards */
-        .news-container {
+        .btn-action:hover {
+            transform: scale(1.05);
+            background: #fff;
+        }
+
+        /* News Section */
+        #news-feed {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 10px;
         }
 
-        .news-card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid var(--fortnite-blue);
-            padding: 15px;
+        .news-item {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--fn-blue);
             position: relative;
         }
 
-        .news-card img { width: 100%; border-bottom: 4px solid var(--fortnite-yellow); }
+        .news-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 4px solid var(--fn-yellow);
+        }
 
-        /* Modal Overlay */
-        .overlay {
+        .news-text {
+            padding: 15px;
+        }
+
+        .news-text h3 { margin: 0; color: var(--fn-yellow); font-size: 1.4rem; }
+        .news-text p { margin: 5px 0 0; font-family: sans-serif; text-transform: none; color: #ccc; font-size: 0.9rem; }
+
+        /* Modal / Popup Styling */
+        .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.85);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            z-index: 1000;
         }
 
-        .modal {
-            background: var(--fortnite-dark-blue);
-            border: 4px solid var(--fortnite-yellow);
+        .modal-box {
+            background: #12284c;
+            border: 4px solid var(--fn-blue);
+            width: 450px;
             padding: 30px;
-            width: 500px;
-            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,1);
         }
 
-        .modal h2 { color: var(--fortnite-yellow); margin-bottom: 20px; }
+        .modal-box h2 { color: var(--fn-yellow); margin-top: 0; border-bottom: 2px solid var(--fn-yellow); }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: var(--fn-blue); }
         input, select, textarea {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
             background: #000;
-            border: 1px solid var(--fortnite-blue);
+            border: 1px solid var(--fn-blue);
             color: white;
+            padding: 10px;
+            font-family: sans-serif;
         }
 
-        .close-btn { position: absolute; top: 10px; right: 10px; cursor: pointer; color: red; }
+        .confirm-btn {
+            width: 100%;
+            background: var(--fn-yellow);
+            color: black;
+            padding: 15px;
+            border: none;
+            font-family: 'Anton';
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: var(--fn-blue); }
     </style>
 </head>
 <body>
 
 <header>
-    <button class="nav-btn active" onclick="loadNews()">NEWS FEED</button>
-    <button class="nav-btn" onclick="alert('Item Registry requires Local Storage access')">ITEM REGISTRY</button>
+    <button class="nav-tab active">News Feed</button>
+    <button class="nav-tab">Item Registry</button>
 </header>
 
-<main>
-    <div class="admin-controls">
-        <button class="action-btn" onclick="openModal('shopModal')">UPDATE ITEM SHOP</button>
-        <button class="action-btn" onclick="openModal('newsModal')">POST NEWS</button>
+<div class="container">
+    <div class="admin-row">
+        <button class="btn-action" onclick="toggleModal('shopModal', true)">Update Item Shop</button>
+        <button class="btn-action" onclick="toggleModal('newsModal', true)">Post News</button>
     </div>
 
-    <div id="display-area">
+    <div id="news-feed">
         </div>
-</main>
+</div>
 
-<div id="newsModal" class="overlay">
-    <div class="modal">
-        <span class="close-btn" onclick="closeModal('newsModal')">X CLOSE</span>
-        <h2>POST NEW ADVISORY</h2>
-        <input type="text" placeholder="NEWS TITLE (e.g. TILTED TOWERS UNDER ATTACK)">
-        <textarea rows="4" placeholder="BODY TEXT..."></textarea>
-        <input type="text" placeholder="IMAGE URL (PNG/JPG)">
-        <button class="action-btn" onclick="confirmAction('News published to staging!')" style="width:100%">PUSH TO SERVERS</button>
+<div id="newsModal" class="modal-overlay">
+    <div class="modal-box">
+        <h2>Post New MOTD</h2>
+        <div class="form-group">
+            <label>Headline</label>
+            <input type="text" id="news-title" placeholder="e.g. DOUBLE XP WEEKEND">
+        </div>
+        <div class="form-group">
+            <label>Image URL</label>
+            <input type="text" id="news-img" placeholder="https://...">
+        </div>
+        <div class="form-group">
+            <label>Message</label>
+            <textarea id="news-body" rows="3"></textarea>
+        </div>
+        <button class="confirm-btn" onclick="submitNews()">Publish to News Feed</button>
+        <button onclick="toggleModal('newsModal', false)" style="background:none; color:red; border:none; margin-top:10px; cursor:pointer;">CANCEL</button>
     </div>
 </div>
 
-<div id="shopModal" class="overlay">
-    <div class="modal">
-        <span class="close-btn" onclick="closeModal('shopModal')">X CLOSE</span>
-        <h2>SHOP OVERRIDE</h2>
-        <label>SELECT RARITY</label>
-        <select>
-            <option>LEGENDARY (2000 V-BUCKS)</option>
-            <option>EPIC (1500 V-BUCKS)</option>
-            <option>RARE (1200 V-BUCKS)</option>
-        </select>
-        <input type="text" placeholder="ITEM ID (e.g. CID_001_Athena_Commando_F_Default)">
-        <input type="number" placeholder="V-BUCKS PRICE">
-        <button class="action-btn" onclick="confirmAction('Adding in 48 hours')" style="width:100%">CONFIRM CHANGES</button>
+<div id="shopModal" class="modal-overlay">
+    <div class="modal-box">
+        <h2>Add to Shop Rotation</h2>
+        <div class="form-group">
+            <label>Select Item Type</label>
+            <select id="item-type">
+                <option>Outfit (Skin)</option>
+                <option>Pickaxe</option>
+                <option>Emote</option>
+                <option>Glider</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Internal Asset ID</label>
+            <input type="text" id="item-id" placeholder="CID_001_Athena_Commando_M">
+        </div>
+        <div class="form-group">
+            <label>Price (V-Bucks)</label>
+            <input type="number" id="item-price" placeholder="1500">
+        </div>
+        <button class="confirm-btn" onclick="submitShop()">Confirm Item Addition</button>
+        <button onclick="toggleModal('shopModal', false)" style="background:none; color:red; border:none; margin-top:10px; cursor:pointer;">CANCEL</button>
     </div>
 </div>
 
 <script>
-    // Fetch News (The only active API part)
-    async function loadNews() {
-        const display = document.getElementById('display-area');
-        display.innerHTML = "<h2>RETRIEVING ENCRYPTED DATA...</h2>";
-        
+    // 1. Load Live News API
+    async function fetchNews() {
+        const feed = document.getElementById('news-feed');
         try {
-            const res = await fetch('https://fortnite-api.com/v2/news/br');
-            const json = await res.json();
-            const news = json.data.motds;
+            const response = await fetch('https://fortnite-api.com/v2/news/br');
+            const result = await response.json();
+            const news = result.data.motds;
 
-            let html = '<div class="news-container">';
-            news.forEach(item => {
-                html += `
-                    <div class="news-card">
-                        <img src="${item.image}">
+            feed.innerHTML = news.map(item => `
+                <div class="news-item">
+                    <img src="${item.image}" alt="news">
+                    <div class="news-text">
                         <h3>${item.title}</h3>
-                        <p style="text-transform: none; color: #aaa;">${item.body}</p>
+                        <p>${item.body}</p>
                     </div>
-                `;
-            });
-            html += '</div>';
-            display.innerHTML = html;
-        } catch (e) {
-            display.innerHTML = "OFFLINE: COULD NOT CONNECT TO EPICGAMES_INTERNALSERV88;
+                </div>
+            `).join('');
+        } catch (err) {
+            feed.innerHTML = "<p>Failed to bridge to Epic Servers...</p>";
         }
     }
 
-    // Modal Logic
-    function openModal(id) {
-        document.getElementById(id).style.display = 'flex';
+    // 2. Modal Controls
+    function toggleModal(id, show) {
+        document.getElementById(id).style.display = show ? 'flex' : 'none';
     }
 
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
+    // 3. Logic for Shop Update
+    function submitShop() {
+        const id = document.getElementById('item-id').value;
+        if(!id) return alert("Please enter an Asset ID");
+        
+        alert(`SUCCESS: Item [${id}] queued for rotation. Adding in 48 hours.`);
+        toggleModal('shopModal', false);
     }
 
-    function confirmAction(message) {
-        alert("COMMAND ACCEPTED: " + message);
-        document.querySelectorAll('.overlay').forEach(o => o.style.display = 'none');
+    // 4. Logic for News Post
+    function submitNews() {
+        const title = document.getElementById('news-title').value;
+        alert(`ADMIN OVERRIDE: News "${title}" has been pushed to the staging server.`);
+        toggleModal('newsModal', false);
     }
 
-    // Initial load
-    loadNews();
+    // Init
+    fetchNews();
 </script>
 
 </body>
+</html>
 </html>
