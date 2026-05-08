@@ -1,322 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Epic Developer Console (Simulation)</title>
-<style>
-  :root{
-    --bg:#0b1020;
-    --bg2:#0f1730;
-    --panel:#141d36;
-    --panel2:#10192f;
-    --panel3:#182544;
-    --line:rgba(150,175,255,.14);
-    --text:#eef3ff;
-    --muted:#a9b7da;
-    --muted2:#7f8cab;
-    --accent:#7dc8ff;
-    --accent2:#9d7dff;
-    --green:#69f0a4;
-    --yellow:#ffd66b;
-    --red:#ff7385;
-    --shadow:0 22px 70px rgba(0,0,0,.45);
-    --radius:18px;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top, rgba(125,200,255,.12), transparent 28%), linear-gradient(180deg, var(--bg2), var(--bg));color:var(--text)}
-  .app{width:100vw;height:100vh;padding:18px;display:flex;align-items:center;justify-content:center}
-  .shell{width:min(1480px,98vw);height:min(860px,95vh);border:1px solid var(--line);border-radius:26px;overflow:hidden;background:linear-gradient(180deg, rgba(22,31,58,.98), rgba(11,16,31,.98));box-shadow:var(--shadow);display:grid;grid-template-columns: 290px 1fr;position:relative}
-  .sidebar{background:linear-gradient(180deg, rgba(18,27,49,.98), rgba(13,19,35,.98));border-right:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px}
-  .logoRow{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.07)}
-  .logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg, var(--accent), var(--accent2));box-shadow:0 10px 30px rgba(125,200,255,.18)}
-  .brand h1{margin:0;font-size:22px;letter-spacing:-.04em}
-  .brand p{margin:4px 0 0;color:var(--muted);font-size:12px}
-  .profile,.miniCard{background:linear-gradient(180deg, rgba(125,200,255,.08), rgba(125,200,255,.03));border:1px solid rgba(125,200,255,.14);border-radius:18px;padding:14px}
-  .profile .name{font-weight:800;font-size:15px}
-  .profile .role{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4}
-  .row{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted)}
-  .pill{padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:rgba(105,240,164,.12);color:var(--green);border:1px solid rgba(105,240,164,.18)}
-  .nav{display:grid;gap:8px}
-  .nav button{border:none;border-radius:16px;padding:13px 13px;color:var(--text);background:rgba(255,255,255,.04);font-size:14px;font-weight:700;text-align:left;cursor:pointer;transition:.15s}
-  .nav button:hover{transform:translateY(-1px);background:rgba(255,255,255,.065)}
-  .nav button.active{background:linear-gradient(90deg, rgba(125,200,255,.18), rgba(157,125,255,.14));outline:1px solid rgba(125,200,255,.18)}
-  .sidebarFooter{margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,.07);color:var(--muted2);font-size:12px;line-height:1.5}
-  .content{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
-  .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
-  .topbar h2{margin:0;font-size:28px;letter-spacing:-.04em}
-  .topbar p{margin:6px 0 0;color:var(--muted);font-size:13px}
-  .search{width:min(410px, 100%);border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text);padding:13px 14px;outline:none}
-  .tabs{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--muted);font-size:12px;font-weight:700}
-  .chip.active{background:rgba(125,200,255,.12);color:#e8f7ff;border-color:rgba(125,200,255,.18)}
-  .view{display:none;flex:1;min-height:0;gap:14px}
-  .view.active{display:grid}
-  .grid4{grid-template-columns:repeat(4,1fr)}
-  .grid3{grid-template-columns:repeat(3,1fr)}
-  .grid2{grid-template-columns:1.2fr .8fr}
-  .card{background:linear-gradient(180deg, rgba(24,37,68,.92), rgba(15,23,44,.96));border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:16px;min-height:120px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
-  .card h3{margin:0 0 10px;font-size:15px}
-  .big{font-size:34px;font-weight:900;letter-spacing:-.05em;margin:4px 0 8px}
-  .muted{color:var(--muted);font-size:12px;line-height:1.5}
-  .contentBox{background:rgba(8,12,22,.45);border:1px solid rgba(255,255,255,.08);border-radius:20px;overflow:hidden;min-height:0}
-  .boxHead{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);display:flex;justify-content:space-between;align-items:center;font-weight:800}
-  .boxBody{padding:14px 16px;overflow:auto;min-height:0}
-  .feedItem{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
-  .feedItem:last-child{border-bottom:none}
-  .feedTop{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px;margin-bottom:5px}
-  .time{color:var(--muted2);font-size:12px}
-  .tag{padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
-  .tag.green{background:rgba(105,240,164,.12);color:var(--green)}
-  .tag.yellow{background:rgba(255,214,107,.12);color:var(--yellow)}
-  .tag.red{background:rgba(255,115,133,.12);color:var(--red)}
-  .table{width:100%;border-collapse:collapse;font-size:13px}
-  .table th,.table td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;vertical-align:top}
-  .table th{color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
-  .statusDot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:var(--green);box-shadow:0 0 12px rgba(105,240,164,.6)}
-  .statusDot.yellow{background:var(--yellow);box-shadow:0 0 12px rgba(255,214,107,.55)}
-  .statusDot.red{background:var(--red);box-shadow:0 0 12px rgba(255,115,133,.55)}
-  .btn{border:none;border-radius:14px;padding:11px 14px;background:linear-gradient(180deg, rgba(125,200,255,.2), rgba(125,200,255,.1));color:#ecfbff;font-weight:800;cursor:pointer}
-  .btn.secondary{background:rgba(255,255,255,.05)}
-  .btn.danger{background:linear-gradient(180deg, rgba(255,115,133,.22), rgba(255,115,133,.12))}
-  .split{display:grid;grid-template-columns:1fr 320px;gap:14px;min-height:0}
-  .reportCard{border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.03);padding:14px;margin-bottom:10px}
-  .reportHead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
-  .reportTitle{font-weight:800}
-  .reportMeta{color:var(--muted2);font-size:12px}
-  .modalBack{position:absolute;inset:0;background:rgba(3,6,12,.62);display:none;align-items:center;justify-content:center;z-index:20}
-  .modal{width:min(560px,92vw);border-radius:22px;background:linear-gradient(180deg, rgba(26,38,68,.98), rgba(12,18,33,.98));border:1px solid rgba(255,255,255,.09);box-shadow:0 40px 120px rgba(0,0,0,.6);overflow:hidden}
-  .modalHeader{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;font-weight:900}
-  .modalBody{padding:18px;color:var(--muted);font-size:14px;line-height:1.6}
-  .modalActions{display:flex;gap:10px;justify-content:flex-end;padding:0 18px 18px}
-  .badge2{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:999px;background:rgba(125,200,255,.12);border:1px solid rgba(125,200,255,.16);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#e8f7ff}
-  .scan,.crt{position:fixed;inset:0;pointer-events:none}
-  .scan{background:linear-gradient(to bottom, transparent, rgba(125,200,255,.06), transparent);animation:scan 4.6s linear infinite;mix-blend-mode:screen}
-  .crt{background:repeating-linear-gradient(to bottom, rgba(255,255,255,.02) 0, rgba(255,255,255,.02) 1px, transparent 3px, transparent 5px)}
-  @keyframes scan{0%{transform:translateY(-120px)}100%{transform:translateY(110vh)}}
-  .tiny{font-size:11px;color:var(--muted2)}
-  .meter{height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;border:1px solid rgba(255,255,255,.06)}
-  .meter>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Admin Panel | Fortnite Clone</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --surface: #1e1e1e;
+            --accent: #25bcff;
+            --text-main: #ffffff;
+            --text-dim: #888;
+            --rarity-common: #bebebe;
+            --rarity-rare: #27a2eb;
+            --rarity-epic: #b046e4;
+            --rarity-legendary: #d37841;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar Navigation */
+        aside { width: 260px; background: #000; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; }
+        .logo { font-weight: 900; font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 40px; color: var(--accent); }
+        nav button { background: none; border: none; color: var(--text-dim); text-align: left; padding: 12px; cursor: pointer; font-size: 1rem; transition: 0.2s; border-radius: 4px; }
+        nav button:hover, nav button.active { color: #fff; background: #222; }
+
+        /* Main Content Area */
+        main { flex: 1; padding: 40px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        /* Item Grid Styling */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+        .card { background: var(--surface); border-radius: 8px; padding: 10px; border: 1px solid #333; text-align: center; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .card img { width: 100%; border-radius: 4px; margin-bottom: 10px; background: #121212; }
+        .card h4 { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card p { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; margin-top: 5px; }
+
+        /* Status Pills */
+        .status { font-size: 0.8rem; background: #1a3a2a; color: #4caf50; padding: 4px 12px; border-radius: 20px; border: 1px solid #4caf50; }
+        
+        /* Loading Spinner */
+        .loader { border: 4px solid #333; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 100px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-<div class="app">
-  <div class="shell">
-    <aside class="sidebar">
-      <div class="logoRow">
-        <div class="logo"></div>
-        <div class="brand">
-          <h1>Dev Portal</h1>
-          <p>Simulation dashboard for a scripted video</p>
-        </div>
-      </div>
 
-      <div class="profile">
-        <div class="name">Logged in: dev.sandbox_07</div>
-        <div class="role">Role: Product UI Engineer • Demo Access • Region: US-East</div>
-        <div class="row"><span>Session</span><span class="pill">ACTIVE</span></div>
-        <div class="row"><span>Build</span><span>ui-18.4.2</span></div>
-        <div class="row"><span>Project</span><span>FN_INTERNAL_UI</span></div>
-      </div>
+<aside>
+    <div class="logo">EPIC_ADMIN // V1</div>
+    <nav style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="active" onclick="loadContent('shop')">LIVE ITEM SHOP</button>
+        <button onclick="loadContent('items')">ITEM REGISTRY</button>
+        <button onclick="loadContent('news')">IN-GAME NEWS</button>
+    </nav>
+</aside>
 
-      <div class="nav">
-        <button class="active navBtn" data-tab="dashboard">Dashboard</button>
-        <button class="navBtn" data-tab="analytics">Analytics</button>
-        <button class="navBtn" data-tab="reports">Reports</button>
-        <button class="navBtn" data-tab="moderation">Moderation</button>
-        <button class="navBtn" data-tab="security">Security</button>
-      </div>
-
-      <div class="sidebarFooter">
-        Modern game-studio style UI with mock data only. No real account or ban access.
-      </div>
-    </aside>
-
-    <main class="content">
-      <div class="topbar">
-        <div>
-          <h2 id="pageTitle">Dashboard Overview</h2>
-          <p id="pageSub">Overview of current build health, activity, and moderation queue.</p>
-        </div>
-        <input class="search" value="Search users, reports, modules, flags..." />
-      </div>
-
-      <div class="tabs" id="tabChips">
-        <div class="chip active" data-chip="dashboard">Overview</div>
-        <div class="chip" data-chip="analytics">Analytics</div>
-        <div class="chip" data-chip="reports">Reports</div>
-        <div class="chip" data-chip="moderation">Moderation</div>
-        <div class="chip" data-chip="security">Security</div>
-      </div>
-
-      <section class="view grid4 active" id="dashboardView">
-        <div class="card"><h3>Live Sessions</h3><div class="big">2,481</div><div class="muted">Current sessions in the active test environment.</div></div>
-        <div class="card"><h3>Open Reports</h3><div class="big">147</div><div class="muted">Queued player reports awaiting review.</div></div>
-        <div class="card"><h3>Moderation Actions</h3><div class="big">31</div><div class="muted">This hour's completed review actions.</div></div>
-        <div class="card"><h3>Service Health</h3><div class="big">99.8%</div><div class="muted">Backend and UI systems are currently healthy.</div></div>
-      </section>
-
-      <section class="view grid2" id="analyticsView">
-        <div class="contentBox">
-          <div class="boxHead">Player Activity</div>
-          <div class="boxBody">
-            <div class="muted">Synthetic chart-style telemetry for a more believable dashboard.</div>
-            <div style="height:16px"></div>
-            <div class="row"><span>Matchmaking</span><span>82%</span></div>
-            <div class="meter"><div style="width:82%"></div></div>
-            <div style="height:12px"></div>
-            <div class="row"><span>Retention</span><span>64%</span></div>
-            <div class="meter"><div style="width:64%"></div></div>
-            <div style="height:12px"></div>
-            <div class="row"><span>Report volume</span><span>27%</span></div>
-            <div class="meter"><div style="width:27%"></div></div>
-            <div style="height:12px"></div>
-            <div class="row"><span>Queue pressure</span><span>41%</span></div>
-            <div class="meter"><div style="width:41%"></div></div>
-          </div>
-        </div>
-        <div class="contentBox">
-          <div class="boxHead">Recent Events</div>
-          <div class="boxBody">
-            <div class="feedItem"><div class="feedTop"><strong>Session spike detected</strong><span class="time">2m ago</span></div><div class="muted">Player load increased in NA-East region.</div></div>
-            <div class="feedItem"><div class="feedTop"><strong>UI deploy completed</strong><span class="time">9m ago</span></div><div class="muted">Dashboard patch rolled out to test build.</div></div>
-            <div class="feedItem"><div class="feedTop"><strong>Moderation queue updated</strong><span class="time">12m ago</span></div><div class="muted">Several high-priority reports were added.</div></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view grid2" id="reportsView">
-        <div class="contentBox">
-          <div class="boxHead">Suspicious Accounts</div>
-          <div class="boxBody">
-            <table class="table">
-              <thead><tr><th>Account</th><th>Risk</th><th>Last Report</th><th>Reason</th></tr></thead>
-              <tbody>
-                <tr><td>StormPulse_44</td><td><span class="statusDot red"></span>High</td><td>14 min ago</td><td>Griefing, repeated abuse</td></tr>
-                <tr><td>NovaWipe_21</td><td><span class="statusDot yellow"></span>Medium</td><td>31 min ago</td><td>Spam pings, suspicious chat</td></tr>
-                <tr><td>PixelRaid_09</td><td><span class="statusDot red"></span>High</td><td>1 hr ago</td><td>Match disruption, evasion</td></tr>
-                <tr><td>OrbitKite_77</td><td><span class="statusDot yellow"></span>Medium</td><td>2 hr ago</td><td>Multiple gameplay flags</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="contentBox">
-          <div class="boxHead">Report Details</div>
-          <div class="boxBody">
-            <div class="reportCard">
-              <div class="reportHead"><div class="reportTitle">StormPulse_44</div><div class="reportMeta">#R-10482</div></div>
-              <div class="muted">2 players reported hostile behavior in Creative mode. Evidence: repeated build-blocking, verbal spam, and forced lobby resets.</div>
-            </div>
-            <div class="reportCard">
-              <div class="reportHead"><div class="reportTitle">NovaWipe_21</div><div class="reportMeta">#R-10496</div></div>
-              <div class="muted">Chat moderation flagged a sequence of repetitive messages and suspicious callouts during a live match.</div>
-            </div>
-            <button class="btn danger" id="banBtn">Ban Player</button>
-            <div class="tiny" style="margin-top:10px;">Demo action only. This opens a scripted popup and updates mock UI state.</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view grid2" id="moderationView">
-        <div class="contentBox">
-          <div class="boxHead">Moderation Queue</div>
-          <div class="boxBody">
-            <div class="feedItem"><div class="feedTop"><strong>Review</strong><span class="tag red">Priority</span></div><div class="muted">StormPulse_44 — recommended action: temporary suspension.</div></div>
-            <div class="feedItem"><div class="feedTop"><strong>Review</strong><span class="tag yellow">Standard</span></div><div class="muted">NovaWipe_21 — recommended action: warning + monitoring.</div></div>
-            <div class="feedItem"><div class="feedTop"><strong>Review</strong><span class="tag red">Priority</span></div><div class="muted">PixelRaid_09 — recommended action: restriction pending manual review.</div></div>
-          </div>
-        </div>
-        <div class="contentBox">
-          <div class="boxHead">Action Panel</div>
-          <div class="boxBody">
-            <div class="muted">Choose a mock enforcement action for the scripted interface.</div>
-            <div style="height:14px"></div>
-            <button class="btn" id="warnBtn" style="width:100%;margin-bottom:10px;">Send Warning</button>
-            <button class="btn secondary" id="watchBtn" style="width:100%;margin-bottom:10px;">Add to Watchlist</button>
-            <button class="btn danger" id="banBtn2" style="width:100%;">Ban Player</button>
-            <div class="badge2">Simulation Only</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view grid2" id="securityView">
-        <div class="contentBox">
-          <div class="boxHead">Access & Safety</div>
-          <div class="boxBody">
-            <div class="feedItem"><div class="feedTop"><strong>Account Scope</strong><span class="tag green">Sandbox</span></div><div class="muted">This panel is a local-only demo with no production permissions.</div></div>
-            <div class="feedItem"><div class="feedTop"><strong>API Mode</strong><span class="tag yellow">Mock</span></div><div class="muted">All stats are generated in-browser for video production.</div></div>
-            <div class="feedItem"><div class="feedTop"><strong>Moderation</strong><span class="tag red">Disabled</span></div><div class="muted">No actual bans, reports, or account actions are performed.</div></div>
-          </div>
-        </div>
-        <div class="contentBox">
-          <div class="boxHead">Session Info</div>
-          <div class="boxBody">
-            <div class="row"><span>Token</span><span>demo_9F3A</span></div>
-            <div class="row"><span>Org</span><span>fictional-studio</span></div>
-            <div class="row"><span>Environment</span><span>staging</span></div>
-            <div class="row"><span>Access</span><span class="pill">read-only</span></div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <div class="modalBack" id="modalBack">
-      <div class="modal">
-        <div class="modalHeader">
-          <span>Confirm Action</span>
-          <span class="tiny">Scripted UI popup</span>
-        </div>
-        <div class="modalBody" id="modalText">This will apply a temporary ban to the selected account in the mock interface.</div>
-        <div class="modalActions">
-          <button class="btn secondary" id="cancelModal">Cancel</button>
-          <button class="btn danger" id="confirmModal">Ban Account</button>
-        </div>
-      </div>
+<main id="main-view">
+    <div class="header">
+        <h1 id="view-title">Live Item Shop</h1>
+        <div class="status">SYSTEMS NOMINAL</div>
     </div>
-  </div>
-</div>
-<div class="scan"></div><div class="crt"></div>
-<script>
-  const tabs = document.querySelectorAll('.navBtn');
-  const chips = document.querySelectorAll('.chip');
-  const views = {
-    dashboard: document.getElementById('dashboardView'),
-    analytics: document.getElementById('analyticsView'),
-    reports: document.getElementById('reportsView'),
-    moderation: document.getElementById('moderationView'),
-    security: document.getElementById('securityView')
-  };
-  const labels = {
-    dashboard: ['Dashboard Overview','Overview of current build health, activity, and moderation queue.'],
-    analytics: ['Analytics','Telemetry, trends, and synthetic performance metrics.'],
-    reports: ['Reports','Suspicious account reports with readable notes.'],
-    moderation: ['Moderation','Scripted enforcement workflow and watchlist actions.'],
-    security: ['Security','Mock access and safety details for the demo environment.']
-  };
-  function show(tab){
-    tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    chips.forEach(c => c.classList.toggle('active', c.dataset.chip === tab));
-    Object.entries(views).forEach(([k,v]) => v.classList.toggle('active', k === tab));
-    document.getElementById('pageTitle').textContent = labels[tab][0];
-    document.getElementById('pageSub').textContent = labels[tab][1];
-  }
-  tabs.forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
-  chips.forEach(c => c.addEventListener('click', () => show(c.dataset.chip)));
+    <div id="content-output">
+        </div>
+</main>
 
-  const modalBack = document.getElementById('modalBack');
-  const modalText = document.getElementById('modalText');
-  const openModal = (txt) => { modalText.textContent = txt; modalBack.style.display = 'flex'; };
-  const closeModal = () => modalBack.style.display = 'none';
-  document.getElementById('banBtn').onclick = () => openModal('Ban StormPulse_44? This scripted action will update the mock moderation queue and show a simulated enforcement popup.');
-  document.getElementById('banBtn2').onclick = () => openModal('Ban selected account in the fake moderation system. No real account action will occur.');
-  document.getElementById('warnBtn').onclick = () => openModal('Send warning to the selected account and add a note to the demo report log.');
-  document.getElementById('watchBtn').onclick = () => openModal('Add account to the watchlist and mark it for elevated review in the mock UI.');
-  document.getElementById('cancelModal').onclick = closeModal;
-  document.getElementById('confirmModal').onclick = () => {
-    closeModal();
-    alert('Simulation: account action recorded in mock interface.');
-  };
-  modalBack.addEventListener('click', e => { if(e.target === modalBack) closeModal(); });
+<script>
+    const output = document.getElementById('content-output');
+    const title = document.getElementById('view-title');
+
+    async function loadContent(view) {
+        output.innerHTML = '<div class="loader"></div>';
+        
+        // Update Active States
+        document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+        event?.target.classList.add('active');
+
+        try {
+            if (view === 'shop') {
+                title.innerText = "Current Live Shop";
+                const res = await fetch('https://fortnite-api.com/v2/shop/br');
+                const data = await res.json();
+                renderItems(data.data.featured.entries.flatMap(e => e.items));
+            } 
+            else if (view === 'items') {
+                title.innerText = "Global Item Registry (Last 50)";
+                const res = await fetch('https://fortnite-api.com/v2/cosmetics/br/new');
+                const data = await res.json();
+                renderItems(data.data.items);
+            }
+            else if (view === 'news') {
+                title.innerText = "Battle Royale News";
+                const res = await fetch('https://fortnite-api.com/v2/news/br');
+                const data = await res.json();
+                renderNews(data.data.motds);
+            }
+        } catch (err) {
+            output.innerHTML = `<p style="color: red;">Error fetching data: ${err.message}</p>`;
+        }
+    }
+
+    function renderItems(items) {
+        let html = '<div class="grid">';
+        items.forEach(item => {
+            html += `
+                <div class="card">
+                    <img src="${item.images.smallIcon || item.images.icon}" alt="${item.name}">
+                    <h4>${item.name}</h4>
+                    <p style="color: var(--rarity-${item.rarity.value.toLowerCase()})">${item.rarity.value}</p>
+                </div>
+            `;
+        });
+        html += '</div>';
+        output.innerHTML = html;
+    }
+
+    function renderNews(newsItems) {
+        let html = '<div style="display: flex; flex-direction: column; gap: 20px;">';
+        newsItems.forEach(news => {
+            html += `
+                <div style="background: var(--surface); border-radius: 12px; overflow: hidden; display: flex;">
+                    <img src="${news.image}" style="width: 300px; object-fit: cover;">
+                    <div style="padding: 20px;">
+                        <h3>${news.title}</h3>
+                        <p style="color: var(--text-dim); margin-top: 10px;">${news.body}</p>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        output.innerHTML = html;
+    }
+
+    // Initial Load
+    loadContent('shop');
 </script>
+
 </body>
 </html>
