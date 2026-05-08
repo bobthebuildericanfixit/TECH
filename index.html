@@ -3,413 +3,320 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Epic Dev Console - Simulation</title>
+<title>Epic Developer Console (Simulation)</title>
 <style>
   :root{
-    --bg1:#09111f;
-    --bg2:#111d33;
-    --panel:#16233b;
-    --panel2:#0c1628;
-    --line:rgba(124,160,255,.18);
-    --text:#f4f7ff;
-    --muted:#9eafcf;
-    --accent:#73d7ff;
-    --accent2:#9a78ff;
-    --green:#62ff9a;
-    --yellow:#ffd56b;
-    --red:#ff6f7f;
+    --bg:#0b1020;
+    --bg2:#0f1730;
+    --panel:#141d36;
+    --panel2:#10192f;
+    --panel3:#182544;
+    --line:rgba(150,175,255,.14);
+    --text:#eef3ff;
+    --muted:#a9b7da;
+    --muted2:#7f8cab;
+    --accent:#7dc8ff;
+    --accent2:#9d7dff;
+    --green:#69f0a4;
+    --yellow:#ffd66b;
+    --red:#ff7385;
+    --shadow:0 22px 70px rgba(0,0,0,.45);
+    --radius:18px;
   }
   *{box-sizing:border-box}
-  html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family: Arial, Helvetica, sans-serif;
-    background:
-      radial-gradient(circle at top, rgba(115,215,255,.16), transparent 30%),
-      linear-gradient(180deg, var(--bg2), var(--bg1));
-    color:var(--text);
-  }
-  .overlay{
-    width:100vw;height:100vh;
-    padding:22px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .panel{
-    width:min(1360px, 96vw);
-    height:min(760px, 94vh);
-    border-radius:26px;
-    background: linear-gradient(180deg, rgba(26,39,66,.97), rgba(10,16,30,.97));
-    border:1px solid var(--line);
-    box-shadow:0 30px 90px rgba(0,0,0,.55);
-    overflow:hidden;
-    display:grid;
-    grid-template-columns: 320px 1fr;
-  }
-  .sidebar{
-    background: linear-gradient(180deg, rgba(17,27,46,.98), rgba(12,18,31,.98));
-    border-right:1px solid var(--line);
-    padding:20px;
-    display:flex;
-    flex-direction:column;
-    gap:16px;
-  }
-  .brand{
-    padding-bottom:14px;
-    border-bottom:1px solid rgba(255,255,255,.08);
-  }
-  .brand .badge{
-    display:inline-block;
-    padding:6px 10px;
-    border-radius:999px;
-    background:rgba(115,215,255,.12);
-    border:1px solid rgba(115,215,255,.18);
-    color:#def7ff;
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:.12em;
-    text-transform:uppercase;
-    margin-bottom:12px;
-  }
-  .brand h1{margin:0;font-size:28px;letter-spacing:-.04em}
-  .brand p{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
-  .profile,.statbox{
-    background: linear-gradient(180deg, rgba(115,215,255,.08), rgba(115,215,255,.03));
-    border:1px solid rgba(115,215,255,.16);
-    border-radius:18px;
-    padding:14px;
-  }
-  .profile .name{
-    font-size:16px;
-    font-weight:800;
-    margin-bottom:4px;
-  }
-  .profile .role{color:var(--muted);font-size:12px}
-  .row{
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-    align-items:center;
-    margin:8px 0;
-    color:var(--muted);
-    font-size:13px;
-  }
-  .pill{
-    padding:5px 10px;
-    border-radius:999px;
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    background:rgba(98,255,154,.12);
-    color:var(--green);
-    border:1px solid rgba(98,255,154,.22);
-  }
-  .nav{
-    display:grid;
-    gap:10px;
-  }
-  .nav button{
-    border:none;
-    border-radius:16px;
-    padding:14px 14px;
-    color:var(--text);
-    background:rgba(255,255,255,.04);
-    font-size:14px;
-    font-weight:700;
-    text-align:left;
-    cursor:pointer;
-  }
-  .nav button.active{
-    background: linear-gradient(90deg, rgba(115,215,255,.18), rgba(154,120,255,.16));
-    outline:1px solid rgba(115,215,255,.22);
-  }
-  .footer{
-    margin-top:auto;
-    padding-top:14px;
-    border-top:1px solid rgba(255,255,255,.08);
-    color:var(--muted);
-    font-size:12px;
-    line-height:1.5;
-  }
-  .content{
-    padding:22px;
-    display:flex;
-    flex-direction:column;
-    gap:16px;
-    min-width:0;
-  }
-  .topbar{
-    display:flex;
-    justify-content:space-between;
-    gap:16px;
-    align-items:flex-start;
-  }
-  .topbar h2{
-    margin:0;
-    font-size:28px;
-    letter-spacing:-.04em;
-  }
-  .topbar p{
-    margin:8px 0 0;
-    color:var(--muted);
-    font-size:13px;
-  }
-  .search{
-    width:min(380px, 100%);
-    border-radius:16px;
-    border:1px solid rgba(255,255,255,.08);
-    background:rgba(255,255,255,.04);
-    color:var(--text);
-    padding:13px 14px;
-    outline:none;
-  }
-  .cards{
-    display:grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap:14px;
-  }
-  .card{
-    border-radius:20px;
-    padding:16px;
-    background: linear-gradient(180deg, rgba(28,41,69,.88), rgba(14,22,39,.9));
-    border:1px solid rgba(255,255,255,.08);
-    min-height:122px;
-  }
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top, rgba(125,200,255,.12), transparent 28%), linear-gradient(180deg, var(--bg2), var(--bg));color:var(--text)}
+  .app{width:100vw;height:100vh;padding:18px;display:flex;align-items:center;justify-content:center}
+  .shell{width:min(1480px,98vw);height:min(860px,95vh);border:1px solid var(--line);border-radius:26px;overflow:hidden;background:linear-gradient(180deg, rgba(22,31,58,.98), rgba(11,16,31,.98));box-shadow:var(--shadow);display:grid;grid-template-columns: 290px 1fr;position:relative}
+  .sidebar{background:linear-gradient(180deg, rgba(18,27,49,.98), rgba(13,19,35,.98));border-right:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px}
+  .logoRow{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg, var(--accent), var(--accent2));box-shadow:0 10px 30px rgba(125,200,255,.18)}
+  .brand h1{margin:0;font-size:22px;letter-spacing:-.04em}
+  .brand p{margin:4px 0 0;color:var(--muted);font-size:12px}
+  .profile,.miniCard{background:linear-gradient(180deg, rgba(125,200,255,.08), rgba(125,200,255,.03));border:1px solid rgba(125,200,255,.14);border-radius:18px;padding:14px}
+  .profile .name{font-weight:800;font-size:15px}
+  .profile .role{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4}
+  .row{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted)}
+  .pill{padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:rgba(105,240,164,.12);color:var(--green);border:1px solid rgba(105,240,164,.18)}
+  .nav{display:grid;gap:8px}
+  .nav button{border:none;border-radius:16px;padding:13px 13px;color:var(--text);background:rgba(255,255,255,.04);font-size:14px;font-weight:700;text-align:left;cursor:pointer;transition:.15s}
+  .nav button:hover{transform:translateY(-1px);background:rgba(255,255,255,.065)}
+  .nav button.active{background:linear-gradient(90deg, rgba(125,200,255,.18), rgba(157,125,255,.14));outline:1px solid rgba(125,200,255,.18)}
+  .sidebarFooter{margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,.07);color:var(--muted2);font-size:12px;line-height:1.5}
+  .content{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+  .topbar h2{margin:0;font-size:28px;letter-spacing:-.04em}
+  .topbar p{margin:6px 0 0;color:var(--muted);font-size:13px}
+  .search{width:min(410px, 100%);border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--text);padding:13px 14px;outline:none}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--muted);font-size:12px;font-weight:700}
+  .chip.active{background:rgba(125,200,255,.12);color:#e8f7ff;border-color:rgba(125,200,255,.18)}
+  .view{display:none;flex:1;min-height:0;gap:14px}
+  .view.active{display:grid}
+  .grid4{grid-template-columns:repeat(4,1fr)}
+  .grid3{grid-template-columns:repeat(3,1fr)}
+  .grid2{grid-template-columns:1.2fr .8fr}
+  .card{background:linear-gradient(180deg, rgba(24,37,68,.92), rgba(15,23,44,.96));border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:16px;min-height:120px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
   .card h3{margin:0 0 10px;font-size:15px}
-  .big{
-    font-size:34px;
-    font-weight:900;
-    letter-spacing:-.05em;
-    margin-bottom:8px;
-  }
+  .big{font-size:34px;font-weight:900;letter-spacing:-.05em;margin:4px 0 8px}
   .muted{color:var(--muted);font-size:12px;line-height:1.5}
-  .main{
-    display:grid;
-    grid-template-columns: 1.2fr .8fr;
-    gap:14px;
-    flex:1;
-    min-height:0;
-  }
-  .box{
-    border-radius:20px;
-    background:rgba(6,10,18,.42);
-    border:1px solid rgba(255,255,255,.08);
-    overflow:auto;
-  }
-  .boxhead{
-    padding:14px 16px;
-    border-bottom:1px solid rgba(255,255,255,.08);
-    background:rgba(255,255,255,.03);
-    font-weight:800;
-    letter-spacing:.03em;
-  }
-  .console{
-    padding:16px;
-    white-space:pre-wrap;
-    font-family:"Courier New", monospace;
-    font-size:13px;
-    line-height:1.65;
-    color:#d7f8ff;
-    min-height:0;
-  }
-  .logbox{padding:0}
-  .log{
-    padding:12px 16px;
-    border-bottom:1px solid rgba(255,255,255,.06);
-    font-size:13px;
-    color:#dbe6ff;
-  }
-  .blue{color:var(--accent)}
-  .green{color:var(--green)}
-  .yellow{color:var(--yellow)}
-  .red{color:var(--red)}
-  .tabview{display:none}
-  .tabview.active{display:block}
-  .badge2{
-    display:inline-block;
-    margin-top:10px;
-    padding:6px 10px;
-    border-radius:999px;
-    background:rgba(115,215,255,.12);
-    color:#def7ff;
-    border:1px solid rgba(115,215,255,.18);
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-  }
-  .scan,.crt{
-    position:fixed;inset:0;pointer-events:none;
-  }
-  .scan{
-    background:linear-gradient(to bottom, transparent, rgba(115,215,255,.07), transparent);
-    animation:scan 4.8s linear infinite;
-    mix-blend-mode:screen;
-  }
-  .crt{
-    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.025) 0, rgba(255,255,255,.025) 1px, transparent 3px, transparent 5px);
-  }
+  .contentBox{background:rgba(8,12,22,.45);border:1px solid rgba(255,255,255,.08);border-radius:20px;overflow:hidden;min-height:0}
+  .boxHead{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);display:flex;justify-content:space-between;align-items:center;font-weight:800}
+  .boxBody{padding:14px 16px;overflow:auto;min-height:0}
+  .feedItem{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+  .feedItem:last-child{border-bottom:none}
+  .feedTop{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px;margin-bottom:5px}
+  .time{color:var(--muted2);font-size:12px}
+  .tag{padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+  .tag.green{background:rgba(105,240,164,.12);color:var(--green)}
+  .tag.yellow{background:rgba(255,214,107,.12);color:var(--yellow)}
+  .tag.red{background:rgba(255,115,133,.12);color:var(--red)}
+  .table{width:100%;border-collapse:collapse;font-size:13px}
+  .table th,.table td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;vertical-align:top}
+  .table th{color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+  .statusDot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:var(--green);box-shadow:0 0 12px rgba(105,240,164,.6)}
+  .statusDot.yellow{background:var(--yellow);box-shadow:0 0 12px rgba(255,214,107,.55)}
+  .statusDot.red{background:var(--red);box-shadow:0 0 12px rgba(255,115,133,.55)}
+  .btn{border:none;border-radius:14px;padding:11px 14px;background:linear-gradient(180deg, rgba(125,200,255,.2), rgba(125,200,255,.1));color:#ecfbff;font-weight:800;cursor:pointer}
+  .btn.secondary{background:rgba(255,255,255,.05)}
+  .btn.danger{background:linear-gradient(180deg, rgba(255,115,133,.22), rgba(255,115,133,.12))}
+  .split{display:grid;grid-template-columns:1fr 320px;gap:14px;min-height:0}
+  .reportCard{border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.03);padding:14px;margin-bottom:10px}
+  .reportHead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+  .reportTitle{font-weight:800}
+  .reportMeta{color:var(--muted2);font-size:12px}
+  .modalBack{position:absolute;inset:0;background:rgba(3,6,12,.62);display:none;align-items:center;justify-content:center;z-index:20}
+  .modal{width:min(560px,92vw);border-radius:22px;background:linear-gradient(180deg, rgba(26,38,68,.98), rgba(12,18,33,.98));border:1px solid rgba(255,255,255,.09);box-shadow:0 40px 120px rgba(0,0,0,.6);overflow:hidden}
+  .modalHeader{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;font-weight:900}
+  .modalBody{padding:18px;color:var(--muted);font-size:14px;line-height:1.6}
+  .modalActions{display:flex;gap:10px;justify-content:flex-end;padding:0 18px 18px}
+  .badge2{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:999px;background:rgba(125,200,255,.12);border:1px solid rgba(125,200,255,.16);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#e8f7ff}
+  .scan,.crt{position:fixed;inset:0;pointer-events:none}
+  .scan{background:linear-gradient(to bottom, transparent, rgba(125,200,255,.06), transparent);animation:scan 4.6s linear infinite;mix-blend-mode:screen}
+  .crt{background:repeating-linear-gradient(to bottom, rgba(255,255,255,.02) 0, rgba(255,255,255,.02) 1px, transparent 3px, transparent 5px)}
   @keyframes scan{0%{transform:translateY(-120px)}100%{transform:translateY(110vh)}}
+  .tiny{font-size:11px;color:var(--muted2)}
+  .meter{height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+  .meter>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 </style>
 </head>
 <body>
-<div class="overlay">
-  <div class="panel">
+<div class="app">
+  <div class="shell">
     <aside class="sidebar">
-      <div class="brand">
-        <div class="badge">Internal Tools</div>
-        <h1>Epic Dev Console</h1>
-        <p>Mock production dashboard for a scripted parody sequence.</p>
+      <div class="logoRow">
+        <div class="logo"></div>
+        <div class="brand">
+          <h1>Dev Portal</h1>
+          <p>Simulation dashboard for a scripted video</p>
+        </div>
       </div>
 
       <div class="profile">
-        <div class="name">Logged in as: jballenger_sim</div>
-        <div class="role">Role: UI Engineer • Sandbox Access • Demo Token</div>
+        <div class="name">Logged in: dev.sandbox_07</div>
+        <div class="role">Role: Product UI Engineer • Demo Access • Region: US-East</div>
         <div class="row"><span>Session</span><span class="pill">ACTIVE</span></div>
+        <div class="row"><span>Build</span><span>ui-18.4.2</span></div>
         <div class="row"><span>Project</span><span>FN_INTERNAL_UI</span></div>
-        <div class="row"><span>Build</span><span>v0.9.8-beta</span></div>
       </div>
 
       <div class="nav">
-        <button class="tabbtn active" data-tab="dashboard">Dashboard</button>
-        <button class="tabbtn" data-tab="telemetry">Telemetry</button>
-        <button class="tabbtn" data-tab="commands">Command Queue</button>
-        <button class="tabbtn" data-tab="regions">Regions</button>
-        <button class="tabbtn" data-tab="security">Security</button>
+        <button class="active navBtn" data-tab="dashboard">Dashboard</button>
+        <button class="navBtn" data-tab="analytics">Analytics</button>
+        <button class="navBtn" data-tab="reports">Reports</button>
+        <button class="navBtn" data-tab="moderation">Moderation</button>
+        <button class="navBtn" data-tab="security">Security</button>
       </div>
 
-      <div class="footer">
-        Visual parody panel only. No real backend or account access.
+      <div class="sidebarFooter">
+        Modern game-studio style UI with mock data only. No real account or ban access.
       </div>
     </aside>
 
     <main class="content">
       <div class="topbar">
         <div>
-          <h2 id="title">Dashboard Overview</h2>
-          <p id="subtitle">Monitoring build health, region sync, and staged UI events.</p>
+          <h2 id="pageTitle">Dashboard Overview</h2>
+          <p id="pageSub">Overview of current build health, activity, and moderation queue.</p>
         </div>
-        <input class="search" value="Search modules, regions, flags..." />
+        <input class="search" value="Search users, reports, modules, flags..." />
       </div>
 
-      <section class="cards">
-        <div class="card">
-          <h3>Live Regions</h3>
-          <div class="big blue">12</div>
-          <div class="muted">Connected simulation zones across all test shards.</div>
+      <div class="tabs" id="tabChips">
+        <div class="chip active" data-chip="dashboard">Overview</div>
+        <div class="chip" data-chip="analytics">Analytics</div>
+        <div class="chip" data-chip="reports">Reports</div>
+        <div class="chip" data-chip="moderation">Moderation</div>
+        <div class="chip" data-chip="security">Security</div>
+      </div>
+
+      <section class="view grid4 active" id="dashboardView">
+        <div class="card"><h3>Live Sessions</h3><div class="big">2,481</div><div class="muted">Current sessions in the active test environment.</div></div>
+        <div class="card"><h3>Open Reports</h3><div class="big">147</div><div class="muted">Queued player reports awaiting review.</div></div>
+        <div class="card"><h3>Moderation Actions</h3><div class="big">31</div><div class="muted">This hour's completed review actions.</div></div>
+        <div class="card"><h3>Service Health</h3><div class="big">99.8%</div><div class="muted">Backend and UI systems are currently healthy.</div></div>
+      </section>
+
+      <section class="view grid2" id="analyticsView">
+        <div class="contentBox">
+          <div class="boxHead">Player Activity</div>
+          <div class="boxBody">
+            <div class="muted">Synthetic chart-style telemetry for a more believable dashboard.</div>
+            <div style="height:16px"></div>
+            <div class="row"><span>Matchmaking</span><span>82%</span></div>
+            <div class="meter"><div style="width:82%"></div></div>
+            <div style="height:12px"></div>
+            <div class="row"><span>Retention</span><span>64%</span></div>
+            <div class="meter"><div style="width:64%"></div></div>
+            <div style="height:12px"></div>
+            <div class="row"><span>Report volume</span><span>27%</span></div>
+            <div class="meter"><div style="width:27%"></div></div>
+            <div style="height:12px"></div>
+            <div class="row"><span>Queue pressure</span><span>41%</span></div>
+            <div class="meter"><div style="width:41%"></div></div>
+          </div>
         </div>
-        <div class="card">
-          <h3>Queued Events</h3>
-          <div class="big green">27</div>
-          <div class="muted">Fake actions staged for the cinematic reveal.</div>
-        </div>
-        <div class="card">
-          <h3>Latency</h3>
-          <div class="big yellow">18ms</div>
-          <div class="muted">Fast enough for smooth overlay animation.</div>
-        </div>
-        <div class="card">
-          <h3>Integrity</h3>
-          <div class="big red">99%</div>
-          <div class="muted">All systems stable inside the demo environment.</div>
+        <div class="contentBox">
+          <div class="boxHead">Recent Events</div>
+          <div class="boxBody">
+            <div class="feedItem"><div class="feedTop"><strong>Session spike detected</strong><span class="time">2m ago</span></div><div class="muted">Player load increased in NA-East region.</div></div>
+            <div class="feedItem"><div class="feedTop"><strong>UI deploy completed</strong><span class="time">9m ago</span></div><div class="muted">Dashboard patch rolled out to test build.</div></div>
+            <div class="feedItem"><div class="feedTop"><strong>Moderation queue updated</strong><span class="time">12m ago</span></div><div class="muted">Several high-priority reports were added.</div></div>
+          </div>
         </div>
       </section>
 
-      <section class="main">
-        <div class="box">
-          <div class="boxhead" id="panelhead">Dashboard Feed</div>
-          <div class="console tabview active" id="dashboard">
-&gt; booting developer UI...
-&gt; verifying sandbox token...
-&gt; syncing UI widgets...
-&gt; loading overlay modules...
-&gt; <span class="green">status: stable</span>
-
-This is a staged interface for a scripted troll video.
-Use it like an internal dev dashboard with fake warnings, fake stats,
-and high-contrast Fortnite-inspired colors.
-          </div>
-
-          <div class="console tabview" id="telemetry">
-&gt; telemetry stream: <span class="green">online</span>
-&gt; packet rate: 14.2k/s
-&gt; player activity graph: <span class="yellow">spiking</span>
-&gt; region drift: 0.8%
-&gt; event sync: <span class="blue">balanced</span>
-          </div>
-
-          <div class="console tabview" id="commands">
-&gt; queued action: fake maintenance alert
-&gt; queued action: dramatic server countdown
-&gt; queued action: warning banner
-&gt; queued action: hidden debug panel
-&gt; queued action: popup storm
-          </div>
-
-          <div class="console tabview" id="regions">
-&gt; NA-East   <span class="green">online</span>
-&gt; NA-West   <span class="green">online</span>
-&gt; EU        <span class="green">online</span>
-&gt; Asia      <span class="yellow">degraded</span>
-&gt; Oceania   <span class="green">online</span>
-          </div>
-
-          <div class="console tabview" id="security">
-&gt; auth model: sandbox-only
-&gt; admin scope: parody
-&gt; account impersonation: disabled
-&gt; real access: <span class="red">none</span>
-&gt; UI status: <span class="green">safe for video</span>
+      <section class="view grid2" id="reportsView">
+        <div class="contentBox">
+          <div class="boxHead">Suspicious Accounts</div>
+          <div class="boxBody">
+            <table class="table">
+              <thead><tr><th>Account</th><th>Risk</th><th>Last Report</th><th>Reason</th></tr></thead>
+              <tbody>
+                <tr><td>StormPulse_44</td><td><span class="statusDot red"></span>High</td><td>14 min ago</td><td>Griefing, repeated abuse</td></tr>
+                <tr><td>NovaWipe_21</td><td><span class="statusDot yellow"></span>Medium</td><td>31 min ago</td><td>Spam pings, suspicious chat</td></tr>
+                <tr><td>PixelRaid_09</td><td><span class="statusDot red"></span>High</td><td>1 hr ago</td><td>Match disruption, evasion</td></tr>
+                <tr><td>OrbitKite_77</td><td><span class="statusDot yellow"></span>Medium</td><td>2 hr ago</td><td>Multiple gameplay flags</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
+        <div class="contentBox">
+          <div class="boxHead">Report Details</div>
+          <div class="boxBody">
+            <div class="reportCard">
+              <div class="reportHead"><div class="reportTitle">StormPulse_44</div><div class="reportMeta">#R-10482</div></div>
+              <div class="muted">2 players reported hostile behavior in Creative mode. Evidence: repeated build-blocking, verbal spam, and forced lobby resets.</div>
+            </div>
+            <div class="reportCard">
+              <div class="reportHead"><div class="reportTitle">NovaWipe_21</div><div class="reportMeta">#R-10496</div></div>
+              <div class="muted">Chat moderation flagged a sequence of repetitive messages and suspicious callouts during a live match.</div>
+            </div>
+            <button class="btn danger" id="banBtn">Ban Player</button>
+            <div class="tiny" style="margin-top:10px;">Demo action only. This opens a scripted popup and updates mock UI state.</div>
+          </div>
+        </div>
+      </section>
 
-        <div class="box logbox">
-          <div class="boxhead">Live Activity</div>
-          <div class="log"><span class="blue">[12:04:11]</span> dashboard widgets loaded</div>
-          <div class="log"><span class="green">[12:04:13]</span> demo token accepted</div>
-          <div class="log"><span class="yellow">[12:04:15]</span> fake region alert queued</div>
-          <div class="log"><span class="red">[12:04:17]</span> maintenance banner armed</div>
-          <div class="log"><span class="blue">[12:04:20]</span> overlay stabilized</div>
-          <div class="badge2">Simulation Only</div>
+      <section class="view grid2" id="moderationView">
+        <div class="contentBox">
+          <div class="boxHead">Moderation Queue</div>
+          <div class="boxBody">
+            <div class="feedItem"><div class="feedTop"><strong>Review</strong><span class="tag red">Priority</span></div><div class="muted">StormPulse_44 — recommended action: temporary suspension.</div></div>
+            <div class="feedItem"><div class="feedTop"><strong>Review</strong><span class="tag yellow">Standard</span></div><div class="muted">NovaWipe_21 — recommended action: warning + monitoring.</div></div>
+            <div class="feedItem"><div class="feedTop"><strong>Review</strong><span class="tag red">Priority</span></div><div class="muted">PixelRaid_09 — recommended action: restriction pending manual review.</div></div>
+          </div>
+        </div>
+        <div class="contentBox">
+          <div class="boxHead">Action Panel</div>
+          <div class="boxBody">
+            <div class="muted">Choose a mock enforcement action for the scripted interface.</div>
+            <div style="height:14px"></div>
+            <button class="btn" id="warnBtn" style="width:100%;margin-bottom:10px;">Send Warning</button>
+            <button class="btn secondary" id="watchBtn" style="width:100%;margin-bottom:10px;">Add to Watchlist</button>
+            <button class="btn danger" id="banBtn2" style="width:100%;">Ban Player</button>
+            <div class="badge2">Simulation Only</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view grid2" id="securityView">
+        <div class="contentBox">
+          <div class="boxHead">Access & Safety</div>
+          <div class="boxBody">
+            <div class="feedItem"><div class="feedTop"><strong>Account Scope</strong><span class="tag green">Sandbox</span></div><div class="muted">This panel is a local-only demo with no production permissions.</div></div>
+            <div class="feedItem"><div class="feedTop"><strong>API Mode</strong><span class="tag yellow">Mock</span></div><div class="muted">All stats are generated in-browser for video production.</div></div>
+            <div class="feedItem"><div class="feedTop"><strong>Moderation</strong><span class="tag red">Disabled</span></div><div class="muted">No actual bans, reports, or account actions are performed.</div></div>
+          </div>
+        </div>
+        <div class="contentBox">
+          <div class="boxHead">Session Info</div>
+          <div class="boxBody">
+            <div class="row"><span>Token</span><span>demo_9F3A</span></div>
+            <div class="row"><span>Org</span><span>fictional-studio</span></div>
+            <div class="row"><span>Environment</span><span>staging</span></div>
+            <div class="row"><span>Access</span><span class="pill">read-only</span></div>
+          </div>
         </div>
       </section>
     </main>
+
+    <div class="modalBack" id="modalBack">
+      <div class="modal">
+        <div class="modalHeader">
+          <span>Confirm Action</span>
+          <span class="tiny">Scripted UI popup</span>
+        </div>
+        <div class="modalBody" id="modalText">This will apply a temporary ban to the selected account in the mock interface.</div>
+        <div class="modalActions">
+          <button class="btn secondary" id="cancelModal">Cancel</button>
+          <button class="btn danger" id="confirmModal">Ban Account</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-
-<div class="scan"></div>
-<div class="crt"></div>
-
+<div class="scan"></div><div class="crt"></div>
 <script>
-  const tabs = document.querySelectorAll('.tabbtn');
-  const views = document.querySelectorAll('.tabview');
-  const title = document.getElementById('title');
-  const subtitle = document.getElementById('subtitle');
-  const panelhead = document.getElementById('panelhead');
-  const labels = {
-    dashboard: ['Dashboard Overview', 'Monitoring build health, region sync, and staged UI events.', 'Dashboard Feed'],
-    telemetry: ['Telemetry', 'Live metrics, packet flow, and synthetic performance data.', 'Telemetry Stream'],
-    commands: ['Command Queue', 'Prepared fake actions for the scripted reveal.', 'Queued Commands'],
-    regions: ['Regions', 'Connected zones and their simulated status levels.', 'Region Status'],
-    security: ['Security', 'Parody-only access and non-functional admin labels.', 'Security Notes']
+  const tabs = document.querySelectorAll('.navBtn');
+  const chips = document.querySelectorAll('.chip');
+  const views = {
+    dashboard: document.getElementById('dashboardView'),
+    analytics: document.getElementById('analyticsView'),
+    reports: document.getElementById('reportsView'),
+    moderation: document.getElementById('moderationView'),
+    security: document.getElementById('securityView')
   };
+  const labels = {
+    dashboard: ['Dashboard Overview','Overview of current build health, activity, and moderation queue.'],
+    analytics: ['Analytics','Telemetry, trends, and synthetic performance metrics.'],
+    reports: ['Reports','Suspicious account reports with readable notes.'],
+    moderation: ['Moderation','Scripted enforcement workflow and watchlist actions.'],
+    security: ['Security','Mock access and safety details for the demo environment.']
+  };
+  function show(tab){
+    tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    chips.forEach(c => c.classList.toggle('active', c.dataset.chip === tab));
+    Object.entries(views).forEach(([k,v]) => v.classList.toggle('active', k === tab));
+    document.getElementById('pageTitle').textContent = labels[tab][0];
+    document.getElementById('pageSub').textContent = labels[tab][1];
+  }
+  tabs.forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
+  chips.forEach(c => c.addEventListener('click', () => show(c.dataset.chip)));
 
-  tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabs.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      views.forEach(v => v.classList.remove('active'));
-      const tab = btn.dataset.tab;
-      document.getElementById(tab).classList.add('active');
-      title.textContent = labels[tab][0];
-      subtitle.textContent = labels[tab][1];
-      panelhead.textContent = labels[tab][2];
-    });
-  });
+  const modalBack = document.getElementById('modalBack');
+  const modalText = document.getElementById('modalText');
+  const openModal = (txt) => { modalText.textContent = txt; modalBack.style.display = 'flex'; };
+  const closeModal = () => modalBack.style.display = 'none';
+  document.getElementById('banBtn').onclick = () => openModal('Ban StormPulse_44? This scripted action will update the mock moderation queue and show a simulated enforcement popup.');
+  document.getElementById('banBtn2').onclick = () => openModal('Ban selected account in the fake moderation system. No real account action will occur.');
+  document.getElementById('warnBtn').onclick = () => openModal('Send warning to the selected account and add a note to the demo report log.');
+  document.getElementById('watchBtn').onclick = () => openModal('Add account to the watchlist and mark it for elevated review in the mock UI.');
+  document.getElementById('cancelModal').onclick = closeModal;
+  document.getElementById('confirmModal').onclick = () => {
+    closeModal();
+    alert('Simulation: account action recorded in mock interface.');
+  };
+  modalBack.addEventListener('click', e => { if(e.target === modalBack) closeModal(); });
 </script>
 </body>
 </html>
