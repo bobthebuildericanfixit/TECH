@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EPIC_INTERNAL // V8_ADMIN</title>
+    <title>EPIC_INTERNAL // V9_ADMIN</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 
@@ -40,38 +40,42 @@
             height: 70vh; overflow-y: auto; padding: 10px;
         }
         .report-entry {
-            display: grid; grid-template-columns: 100px 1fr 1fr 200px;
-            background: #111; margin-bottom: 4px; padding: 10px;
-            border-left: 4px solid var(--fn-red); align-items: center; font-size: 0.9rem;
+            display: grid; grid-template-columns: 100px 1.5fr 1fr 220px;
+            background: #111; margin-bottom: 4px; padding: 12px;
+            border-left: 4px solid var(--fn-red); align-items: center;
         }
 
-        /* Map Zoom Logic */
-        .map-container { 
-            width: 100%; height: 75vh; border: 3px solid var(--fn-blue); 
-            overflow: hidden; position: relative; cursor: grab; background: #000;
+        /* Dev Locker Style */
+        .locker-layout { display: grid; grid-template-columns: 1fr 350px; gap: 20px; height: 75vh; }
+        .asset-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px; overflow-y: auto; padding-right: 10px;
         }
-        #map-img { 
-            width: 100%; transition: transform 0.2s ease; transform-origin: center;
+        .asset-card { 
+            background: #000; border: 1px solid #333; cursor: pointer; position: relative;
+            transition: 0.2s;
         }
+        .asset-card:hover { border-color: var(--fn-yellow); }
+        .asset-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+        .asset-card p { font-size: 0.65rem; margin: 5px; text-align: center; white-space: nowrap; overflow: hidden; }
 
-        /* Dev Locker Fix */
-        .grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px; max-height: 75vh; overflow-y: auto;
-        }
-        .asset-card { background: #000; border: 1px solid #333; text-align: center; font-size: 0.7rem; }
-        .asset-card img { width: 100%; background: #111; }
+        .granted-panel { background: rgba(0,0,0,0.5); border-left: 2px solid var(--fn-purple); padding: 15px; overflow-y: auto; }
 
-        /* Buttons */
-        .btn-action { background: var(--fn-yellow); color: #000; padding: 6px 12px; clip-path: var(--slant); border: none; cursor: pointer; font-family: 'Anton'; }
-        .btn-purple { background: var(--fn-purple); color: white; }
+        /* Tournament Cards */
+        .tourney-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .tourney-card { background: #000; border: 2px solid var(--fn-blue); position: relative; }
+        .tourney-card img { width: 100%; border-bottom: 3px solid var(--fn-yellow); }
+        .reward-badge { position: absolute; top: 10px; right: 10px; background: var(--fn-yellow); color: black; padding: 2px 10px; font-size: 0.9rem; }
+
+        .btn-action { background: var(--fn-yellow); color: #000; padding: 6px 15px; clip-path: var(--slant); border: none; cursor: pointer; font-family: 'Anton'; }
+        .btn-undo { background: #555; color: white; padding: 4px 10px; clip-path: var(--slant); border: none; cursor: pointer; font-family: 'Anton'; }
         
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000;
         }
-        .modal { background: #12284c; border: 4px solid var(--fn-blue); width: 400px; padding: 20px; }
-        input { width: 100%; margin: 10px 0; padding: 8px; background: #000; color: #fff; border: 1px solid var(--fn-blue); }
+        .modal { background: #12284c; border: 4px solid var(--fn-blue); width: 400px; padding: 25px; }
+        input { width: 100%; margin: 10px 0; padding: 10px; background: #000; color: #fff; border: 1px solid var(--fn-blue); box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -79,99 +83,97 @@
 <header>
     <div style="display: flex; align-items: center;">
         <button class="nav-tab active" onclick="switchTab('reports')">Live Reports</button>
-        <button class="nav-tab" onclick="switchTab('map')">Tactical Map</button>
         <button class="nav-tab" onclick="switchTab('tournaments')">Tournaments</button>
         <button class="nav-tab" onclick="switchTab('locker')">Dev Locker</button>
     </div>
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <div id="live-indicator" style="color: #4caf50; font-size: 0.8rem;">● CONNECTION STABLE</div>
-    </div>
+    <div style="font-size: 0.8rem; color: var(--fn-yellow);">INTERNAL_DEV_V9 // STATUS: ONLINE</div>
 </header>
 
 <div class="container">
     <div id="view-reports">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="color:var(--fn-red)">Incoming Reports Queue</h2>
-            <button class="btn-action" style="background:#555; color:white" onclick="undoLast()">UNDO LAST ACTION</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="color:var(--fn-red)">Active Report Queue</h2>
+            <button class="btn-undo" onclick="undoAction()">UNDO PREVIOUS ACTION</button>
         </div>
         <div class="report-feed" id="report-container"></div>
     </div>
 
-    <div id="view-map" style="display:none; text-align: center;">
-        <p>Use Mouse Wheel to Zoom | Click & Drag to view locations</p>
-        <div class="map-container" id="map-cont" onwheel="zoomMap(event)">
-            <img id="map-img" src="" alt="Syncing Map...">
-        </div>
-    </div>
-
     <div id="view-tournaments" style="display:none;">
-        <button class="btn-action" style="margin-bottom:15px;" onclick="showModal('tourneyModal')">Create Tournament</button>
-        <div class="grid" id="tourney-grid"></div>
+        <button class="btn-action" style="margin-bottom:15px;" onclick="showModal('tourneyModal')">Schedule New Tournament</button>
+        <div class="tourney-grid" id="tourney-grid"></div>
     </div>
 
     <div id="view-locker" style="display:none;">
-        <div style="margin-bottom:10px;">
-            <input type="text" id="locker-search" placeholder="Search Skins, Pickaxes..." onkeyup="searchAssets()" style="width:300px">
+        <div class="locker-layout">
+            <div>
+                <input type="text" id="asset-search" placeholder="Search Global Registry..." onkeyup="searchAssets()">
+                <div class="asset-grid" id="asset-grid"></div>
+            </div>
+            <div class="granted-panel">
+                <h3 style="color:var(--fn-purple)">Granted Assets (Target: Dev_01)</h3>
+                <div id="granted-list"></div>
+            </div>
         </div>
-        <div class="grid" id="locker-grid"></div>
     </div>
 </div>
 
 <div id="banModal" class="modal-overlay">
     <div class="modal">
-        <h2 id="ban-target-name">Target: User</h2>
-        <input type="number" id="ban-qty" value="24" placeholder="Duration (Hours)">
-        <button id="ban-execute" class="btn-action" style="width:100%">Execute Action</button>
-        <button onclick="hideModal('banModal')" style="background:none; color:red; border:none; width:100%; margin-top:10px; cursor:pointer;">ABORT</button>
+        <h3 id="ban-title">Action Title</h3>
+        <label style="font-size: 0.8rem;">Duration (Hours)</label>
+        <input type="number" id="ban-qty" value="72">
+        <button id="ban-exec" class="btn-action" style="width:100%">Confirm Protocol</button>
+        <button onclick="hideModal('banModal')" style="background:none; border:none; color:red; width:100%; margin-top:10px; cursor:pointer;">ABORT</button>
     </div>
 </div>
 
 <div id="tourneyModal" class="modal-overlay">
     <div class="modal">
-        <h2>New Competition</h2>
+        <h3>Create Competition</h3>
         <input type="text" id="t-name" placeholder="Name">
+        <input type="text" id="t-reward" placeholder="Reward (e.g. 50,000 V-Bucks + Trophy)">
         <input type="text" id="t-img" placeholder="Image URL">
-        <button class="btn-action" style="width:100%" onclick="addTournament()">Publish Tournament</button>
-        <button onclick="hideModal('tourneyModal')" style="background:none; color:red; border:none; width:100%; margin-top:10px; cursor:pointer;">ABORT</button>
+        <button class="btn-action" style="width:100%" onclick="addTournament()">Publish Event</button>
+        <button onclick="hideModal('tourneyModal')" style="background:none; border:none; color:red; width:100%; margin-top:10px; cursor:pointer;">CANCEL</button>
     </div>
 </div>
 
 <script>
-    let reports = JSON.parse(localStorage.getItem('fn_v8_reports')) || [];
-    let customTourneys = JSON.parse(localStorage.getItem('fn_v8_tourneys')) || [];
+    let reports = JSON.parse(localStorage.getItem('v9_reports')) || [];
+    let tourneys = JSON.parse(localStorage.getItem('v9_tourneys')) || [];
+    let grantedAssets = JSON.parse(localStorage.getItem('v9_granted')) || [];
     let allAssets = [];
     let history = [];
-    let mapScale = 1;
 
-    const sweatyNames = ["v_Shifted", "TZ_Ryz", "Not_Aqua", "Parallel_F8", "Cold.fn", "Lxsh.cc", "Snypr", "Faded_77", "Clix_Fan_8", "v_Dusk"];
+    const sweatyPrefixes = ["v_", "TZ_", "Not_", "Parallel_", "77_", "Lxsh_", "Cold_", "Snypr_", "Faded_", "Pure_"];
+    const sweatyRoots = ["Shifted", "Ryz", "Aqua", "Dusk", "Vibe", "Clix", "Mongy", "Siphon", "Logic", "Kyl"];
 
-    // --- Tab Switcher ---
+    // --- Tab Logic ---
     function switchTab(v) {
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
-        ['reports','map','tournaments','locker'].forEach(id => {
+        ['reports','tournaments','locker'].forEach(id => {
             document.getElementById('view-'+id).style.display = (id === v) ? 'block' : 'none';
         });
-        if(v === 'map') loadMap();
-        if(v === 'locker' && allAssets.length === 0) fetchLocker();
-        if(v === 'tournaments') loadTournaments();
+        if(v === 'locker' && allAssets.length === 0) fetchAssets();
+        if(v === 'tournaments') renderTournaments();
     }
 
-    // --- High Frequency Reports ---
+    // --- Sweaty Reports Logic ---
     function generateReport() {
-        const name = sweatyNames[Math.floor(Math.random() * sweatyNames.length)] + "_" + Math.floor(Math.random() * 99);
+        const pre = sweatyPrefixes[Math.floor(Math.random() * sweatyPrefixes.length)];
+        const root = sweatyRoots[Math.floor(Math.random() * sweatyRoots.length)];
+        const name = pre + root; // Clean, non-numeric sweaty names
+
         const report = {
             id: Date.now(),
             user: name,
-            reason: ["Aimbot", "Wallhack", "Teaming", "Griefing"][Math.floor(Math.random()*4)],
-            time: new Date().toLocaleTimeString()
+            reason: ["Aimbot", "Wallhack", "Toxic Behavior", "Teaming"][Math.floor(Math.random()*4)],
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
         };
         reports.unshift(report);
-        if(reports.length > 50) reports.pop();
-        localStorage.setItem('fn_v8_reports', JSON.stringify(reports));
-        renderReports();
-        
-        // Consistent speed: 1-5 seconds
+        if(reports.length > 40) reports.pop();
+        saveAndRender();
         setTimeout(generateReport, Math.random() * 4000 + 1000);
     }
 
@@ -183,63 +185,49 @@
                 <span style="color:var(--fn-yellow)">${r.user}</span>
                 <span style="color:var(--fn-red)">${r.reason}</span>
                 <div style="display:flex; gap:5px;">
-                    <button class="btn-action" onclick="prepBan('${r.user}', ${r.id}, 'GAME')">BAN</button>
-                    <button class="btn-action btn-purple" onclick="prepBan('${r.user}', ${r.id}, 'SOCIAL')">SOC</button>
+                    <button class="btn-action" onclick="prepAction('${r.user}', ${r.id}, 'GAME')">BAN</button>
+                    <button class="btn-action" style="background:var(--fn-purple); color:white;" onclick="prepAction('${r.user}', ${r.id}, 'SOCIAL')">SOC</button>
                 </div>
             </div>
         `).join('');
     }
 
-    function prepBan(user, id, type) {
-        document.getElementById('ban-target-name').innerText = `${type} BAN: ${user}`;
-        document.getElementById('ban-execute').onclick = () => executeBan(id, type);
+    function prepAction(user, id, type) {
+        document.getElementById('ban-title').innerText = `${type} ACTION: ${user}`;
+        document.getElementById('ban-exec').onclick = () => executeAction(id);
         showModal('banModal');
     }
 
-    function executeBan(id, type) {
+    function executeAction(id) {
         const idx = reports.findIndex(r => r.id === id);
         if(idx > -1) {
             history.push({index: idx, data: reports[idx]});
             reports.splice(idx, 1);
-            localStorage.setItem('fn_v8_reports', JSON.stringify(reports));
-            renderReports();
+            saveAndRender();
             hideModal('banModal');
         }
     }
 
-    function undoLast() {
-        if(history.length === 0) return;
-        const item = history.pop();
-        reports.splice(item.index, 0, item.data);
+    function undoAction() {
+        if(history.length === 0) return alert("Nothing to undo!");
+        const last = history.pop();
+        reports.splice(last.index, 0, last.data);
         renderReports();
     }
 
-    // --- Zoomable Map ---
-    async function loadMap() {
-        const res = await fetch('https://fortnite-api.com/v1/map');
-        const data = await res.json();
-        document.getElementById('map-img').src = data.data.images.pois; // POI map has names
-    }
-
-    function zoomMap(e) {
-        e.preventDefault();
-        mapScale += e.deltaY * -0.001;
-        mapScale = Math.min(Math.max(1, mapScale), 4);
-        document.getElementById('map-img').style.transform = `scale(${mapScale})`;
-    }
-
-    // --- Dev Locker Fix ---
-    async function fetchLocker() {
+    // --- Dev Locker Logic ---
+    async function fetchAssets() {
         const res = await fetch('https://fortnite-api.com/v2/cosmetics/br');
         const json = await res.json();
         allAssets = json.data;
         renderLocker(allAssets.slice(0, 50));
+        renderGranted();
     }
 
     function renderLocker(items) {
-        const grid = document.getElementById('locker-grid');
+        const grid = document.getElementById('asset-grid');
         grid.innerHTML = items.map(item => `
-            <div class="asset-card">
+            <div class="asset-card" onclick="grantAsset('${item.id}')">
                 <img src="${item.images.icon}" loading="lazy">
                 <p>${item.name}</p>
             </div>
@@ -247,38 +235,66 @@
     }
 
     function searchAssets() {
-        const val = document.getElementById('locker-search').value.toLowerCase();
+        const val = document.getElementById('asset-search').value.toLowerCase();
         const filtered = allAssets.filter(a => a.name.toLowerCase().includes(val)).slice(0, 50);
         renderLocker(filtered);
     }
 
-    // --- Tournaments ---
-    async function loadTournaments() {
-        // Fetch real tournaments
-        const res = await fetch('https://fortnite-api.com/v2/news/br');
-        const data = await res.json();
-        const apiTourneys = data.data.motds.filter(m => m.title.toLowerCase().includes('cup') || m.title.toLowerCase().includes('tournament'));
-        
+    function grantAsset(id) {
+        const item = allAssets.find(a => a.id === id);
+        if(!grantedAssets.some(a => a.id === id)) {
+            grantedAssets.unshift({id: item.id, name: item.name, img: item.images.icon});
+            localStorage.setItem('v9_granted', JSON.stringify(grantedAssets));
+            renderGranted();
+        }
+    }
+
+    function renderGranted() {
+        const cont = document.getElementById('granted-list');
+        cont.innerHTML = grantedAssets.map(a => `
+            <div style="display:flex; align-items:center; gap:10px; background:#111; margin-bottom:5px; padding:5px; border-left:3px solid var(--fn-purple);">
+                <img src="${a.img}" style="width:40px;">
+                <span style="font-size:0.8rem;">${a.name}</span>
+                <span style="margin-left:auto; color:red; cursor:pointer;" onclick="revokeAsset('${a.id}')">X</span>
+            </div>
+        `).join('');
+    }
+
+    function revokeAsset(id) {
+        grantedAssets = grantedAssets.filter(a => a.id !== id);
+        localStorage.setItem('v9_granted', JSON.stringify(grantedAssets));
+        renderGranted();
+    }
+
+    // --- Tournaments Logic ---
+    function renderTournaments() {
         const grid = document.getElementById('tourney-grid');
-        const total = [...customTourneys, ...apiTourneys];
-        grid.innerHTML = total.map(t => `
-            <div style="background:#000; border:2px solid var(--fn-blue); padding:10px;">
-                <img src="${t.image || t.img}" style="width:100%; border-bottom:2px solid var(--fn-yellow)">
-                <h3>${t.title || t.name}</h3>
-                <p style="font-size:0.8rem; color:#aaa">${t.body || 'Scheduled Event'}</p>
+        grid.innerHTML = tourneys.map(t => `
+            <div class="tourney-card">
+                <div class="reward-badge">${t.reward}</div>
+                <img src="${t.img || 'https://placehold.co/600x300/000/fff?text=TOURNAMENT'}">
+                <div style="padding:15px;"><h3>${t.name}</h3></div>
             </div>
         `).join('');
     }
 
     function addTournament() {
         const name = document.getElementById('t-name').value;
+        const reward = document.getElementById('t-reward').value;
         const img = document.getElementById('t-img').value;
-        customTourneys.unshift({title: name, image: img});
-        localStorage.setItem('fn_v8_tourneys', JSON.stringify(customTourneys));
-        loadTournaments();
-        hideModal('tourneyModal');
+        if(name && reward) {
+            tourneys.unshift({name, reward, img});
+            localStorage.setItem('v9_tourneys', JSON.stringify(tourneys));
+            renderTournaments();
+            hideModal('tourneyModal');
+        }
     }
 
+    // --- Utils ---
+    function saveAndRender() {
+        localStorage.setItem('v9_reports', JSON.stringify(reports));
+        renderReports();
+    }
     function showModal(id) { document.getElementById(id).style.display = 'flex'; }
     function hideModal(id) { document.getElementById(id).style.display = 'none'; }
 
