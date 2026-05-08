@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EPIC_SYSTEMS // NOC_V13</title>
+    <title>EPIC_SYSTEMS // MOD_CORE_V14</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
         :root {
@@ -15,7 +15,6 @@
             height: 100vh; overflow: hidden; font-size: 14px;
         }
         
-        /* Header Stats Bar */
         header {
             background: #000; display: flex; align-items: center; padding: 0 20px;
             border-bottom: 2px solid var(--fn-blue); height: 70px; justify-content: space-between;
@@ -24,51 +23,41 @@
         .val { color: var(--fn-yellow); font-size: 1.1rem; display: block; }
         .lbl { font-size: 0.6rem; color: #666; }
 
-        /* Navigation */
-        nav { display: flex; background: #111; padding: 5px; gap: 5px; }
-        .nav-btn {
-            background: transparent; border: none; color: #555; padding: 10px 20px;
-            cursor: pointer; font-family: 'Anton'; transition: 0.2s;
-        }
-        .nav-btn.active { color: var(--fn-blue); border-bottom: 2px solid var(--fn-blue); }
-
-        /* Main Layout */
-        .container { display: grid; grid-template-columns: 300px 1fr 300px; gap: 15px; padding: 15px; height: calc(100vh - 130px); }
+        .container { display: grid; grid-template-columns: 300px 1fr 300px; gap: 15px; padding: 15px; height: calc(100vh - 100px); }
         .panel { background: var(--panel-bg); border: 1px solid #222; display: flex; flex-direction: column; overflow: hidden; }
         .panel-header { background: #111; padding: 10px; font-size: 0.8rem; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
 
-        /* Feeds */
-        .scroll-area { flex-grow: 1; overflow-y: auto; padding: 10px; }
+        .scroll-area { flex-grow: 1; overflow-y: auto; padding: 10px; scroll-behavior: smooth; }
         .entry { 
             background: #0a0a0a; border-left: 3px solid var(--fn-blue); 
             padding: 10px; margin-bottom: 8px; cursor: pointer; transition: 0.1s;
+            animation: slideIn 0.2s ease-out;
         }
-        .entry:hover { background: #151515; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        .entry:hover { background: #151515; border-left-width: 6px; }
         .entry.high-risk { border-color: var(--fn-red); }
 
-        /* Detail Modal */
         #modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000;
         }
-        .modal-box { background: #050505; border: 2px solid var(--fn-blue); width: 650px; padding: 30px; }
+        .modal-box { background: #050505; border: 2px solid var(--fn-blue); width: 600px; padding: 30px; }
         .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
         .data-item { background: #111; padding: 10px; border: 1px solid #222; }
         .chat-log { background: #000; font-family: monospace; padding: 10px; color: #888; font-size: 0.75rem; border: 1px solid #333; margin: 10px 0; }
 
-        /* UI Elements */
-        .btn { padding: 10px; border: none; font-family: 'Anton'; cursor: pointer; width: 100%; margin-top: 5px; }
+        .btn { padding: 12px; border: none; font-family: 'Anton'; cursor: pointer; width: 100%; margin-top: 5px; text-transform: uppercase; }
         .btn-red { background: var(--fn-red); color: white; }
         .btn-purple { background: var(--fn-purple); color: white; }
         .btn-yellow { background: var(--fn-yellow); color: black; }
 
-        .ping-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #111; font-size: 0.8rem; }
+        .ping-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #111; font-size: 0.8rem; }
         .ping-val { color: var(--status-green); }
-        .ping-high { color: var(--fn-red); font-weight: bold; }
+        .ping-high { color: var(--fn-red); }
 
         #notify-box { position: fixed; bottom: 20px; right: 20px; z-index: 2000; }
-        .toast { background: var(--fn-blue); padding: 15px 25px; margin-top: 5px; border-left: 5px solid var(--fn-yellow); animation: slide 0.3s ease; }
-        @keyframes slide { from { transform: translateX(100%); } }
+        .toast { background: var(--fn-blue); padding: 15px 25px; margin-top: 5px; border-left: 5px solid var(--fn-yellow); animation: toastIn 0.3s ease; }
+        @keyframes toastIn { from { transform: translateX(100%); } }
     </style>
 </head>
 <body>
@@ -76,57 +65,41 @@
 <header>
     <div style="display: flex; align-items: center;">
         <div class="header-stat">
-            <span class="lbl">TOTAL V-BUCKS CIRCULATING</span>
-            <span class="val">14,209,551,000</span>
-        </div>
-        <div class="header-stat">
             <span class="lbl">LIVE CONCURRENT PLAYERS</span>
             <span id="player-count" class="val">1,850,211</span>
         </div>
+        <div class="header-stat">
+            <span class="lbl">REPORTS PROCESSED (SESSION)</span>
+            <span id="processed-count" class="val" style="color: var(--fn-blue);">0</span>
+        </div>
     </div>
-    <div style="text-align: right;">
-        <span style="color: var(--fn-blue); letter-spacing: 2px;">EPIC_INTERNAL_DASHBOARD</span>
-        <div style="font-size: 0.6rem; color: #444;">SECURE_CONNECTION_STABLE</div>
+    <div onclick="toggleServer()" style="cursor:pointer; display:flex; align-items:center; gap:10px; background:#111; padding:10px 20px; border:1px solid #333;">
+        <div id="status-dot" style="width:12px; height:12px; border-radius:50%; background:var(--status-green);"></div>
+        <span id="status-text">SRV_ONLINE</span>
     </div>
 </header>
 
-<nav>
-    <button class="nav-btn active" onclick="setTab('mod')">Moderation & Logs</button>
-    <button class="nav-btn" onclick="setTab('econ')">Economy & Gifting</button>
-    <button class="nav-btn" onclick="setTab('creative')">Creative Analytics</button>
-</nav>
-
 <div class="container">
     <div class="panel">
-        <div class="panel-header">Regional Infrastructure <span>Health</span></div>
-        <div class="scroll-area" id="ping-monitor">
-            </div>
+        <div class="panel-header">Cloud Node Latency <span>Live</span></div>
+        <div class="scroll-area" id="ping-monitor"></div>
         <div style="padding: 10px; background: #000;">
-            <button class="btn btn-yellow" style="font-size: 0.7rem;" onclick="reRouteTraffic()">Re-Route Traffic</button>
+            <button class="btn btn-yellow" onclick="reRouteTraffic()">Optimize Cloud Routing</button>
         </div>
     </div>
 
     <div class="panel">
-        <div class="panel-header" id="feed-title">Active Reports Queue</div>
+        <div class="panel-header">Incoming Report Stream <span style="color: var(--fn-red);" id="live-indicator">● LIVE_FEED</span></div>
         <div class="scroll-area" id="main-feed"></div>
+        <div style="padding: 10px; background: #000; display: flex; gap: 5px;">
+            <button class="btn" style="background:#333; color:white;" onclick="undoAction()">Undo Last Ban</button>
+            <button class="btn btn-red" onclick="clearFeed()">Clear Feed</button>
+        </div>
     </div>
 
     <div class="panel">
-        <div class="panel-header">Live Market Stats</div>
-        <div class="scroll-area">
-            <div class="data-item">
-                <span class="lbl">TOP PURCHASED (LAST 1H)</span>
-                <span class="val" style="font-size: 0.9rem;">Renegade Lynx (OG Remix)</span>
-            </div>
-            <div class="data-item" style="margin-top: 10px;">
-                <span class="lbl">STORE REVENUE (REAL-TIME)</span>
-                <span class="val" style="color: var(--status-green);">$412,550.00</span>
-            </div>
-            <hr border="0" style="height:1px; background:#222; margin: 15px 0;">
-            <h4 style="margin:0 0 10px 0;">Economy Control</h4>
-            <input type="text" id="gift-user" placeholder="Recipient..." style="width:100%; background:#000; border:1px solid #333; color:white; padding:10px; box-sizing:border-box;">
-            <button class="btn btn-yellow" onclick="notify('Economy Transfer Ready')">Gift V-Bucks/Items</button>
-        </div>
+        <div class="panel-header">Active Support Queue</div>
+        <div class="scroll-area" id="support-feed"></div>
     </div>
 </div>
 
@@ -142,12 +115,11 @@
             <div class="data-item"><span class="lbl">HARDWARE ID (HWID)</span><span id="m-hwid" class="val" style="font-size:0.9rem;">XXX-XXX-XXX</span></div>
         </div>
 
-        <div class="chat-log" id="m-chat">
-            </div>
+        <div class="chat-log" id="m-chat"></div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px;">
-            <button class="btn btn-red" onclick="execAction('HARD_BAN')">HARD BAN (HWID)</button>
-            <button class="btn btn-purple" onclick="execAction('SHADOW_BAN')">SHADOW BAN</button>
+            <button class="btn btn-red" onclick="execProtocol('HARD_BAN')">HARD BAN</button>
+            <button class="btn btn-purple" onclick="execProtocol('SHADOW_BAN')">SHADOW BAN</button>
             <button class="btn" style="background:#333; color:white;" onclick="closeModal()">DISMISS</button>
         </div>
     </div>
@@ -156,110 +128,132 @@
 <div id="notify-box"></div>
 
 <script>
-    let activeTab = 'mod';
-    const names = ["v_Shifted", "TZ_Aqua", "Pure_Logic", "Lxsh_cc", "Parallel_F8", "Cold_Ryz", "Not_Clix"];
-    const chatSamples = [
-        ["User: GGs only", "User: get boxed kid", "User: literal zero earnings"],
-        ["User: I'm laggy", "User: reported for teaming", "User: check my twitch"],
-        ["User: look at this glitch", "User: wallhack enabled lol", "User: kidding"]
-    ];
+    let isOnline = true;
+    let processed = 0;
+    let history = [];
+    const names = ["v_Shifted", "TZ_Aqua", "Pure_Logic", "Lxsh_cc", "Parallel_F8", "Cold_Ryz", "Not_Clix", "77_Vibe", "lxsh.fn"];
+    const infractions = ["Aimbot Detected", "Suspicious ESP", "Teaming (Ranked)", "Toxic Comms", "Griefing", "Hardware Spoofing"];
 
-    function setTab(t) {
-        activeTab = t;
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-        renderFeed();
-    }
-
-    function renderFeed() {
+    // --- Stream Logic ---
+    function generateReport() {
+        if(!isOnline) return;
+        
         const feed = document.getElementById('main-feed');
-        const title = document.getElementById('feed-title');
-        feed.innerHTML = "";
+        const user = names[Math.floor(Math.random()*names.length)] + "_" + Math.floor(Math.random()*99);
+        const reason = infractions[Math.floor(Math.random()*infractions.length)];
+        const isHigh = reason.includes("Aimbot") || reason.includes("Spoofing");
 
-        if (activeTab === 'mod') {
-            title.innerText = "Active Reports Queue";
-            for(let i=0; i<10; i++) {
-                const user = names[Math.floor(Math.random()*names.length)] + "_" + Math.floor(Math.random()*99);
-                const isHigh = Math.random() > 0.7;
-                const div = document.createElement('div');
-                div.className = `entry ${isHigh ? 'high-risk' : ''}`;
-                div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>${user}</span>
-                        <span style="color:${isHigh?'var(--fn-red)':'var(--fn-blue)'}">${isHigh?'SUSPECTED_CHEATER':'HARASSMENT'}</span>
-                    </div>
-                `;
-                div.onclick = () => openInvestigation(user);
-                feed.appendChild(div);
-            }
-        } else if (activeTab === 'creative') {
-            title.innerText = "UEFN Creator Analytics";
-            const maps = ["The Pit (Updated)", "Goated Zone Wars", "Crazy Red vs Blue", "Skibidi Tycoon"];
-            feed.innerHTML = maps.map(m => `
-                <div class="entry" style="border-color:var(--fn-purple)">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>${m}</span>
-                        <span style="color:var(--status-green)">+$${Math.floor(Math.random()*5000)} Payout</span>
-                    </div>
-                    <div class="lbl">Active Players: ${Math.floor(Math.random()*50000)}</div>
-                </div>
-            `).join('');
-        }
+        const div = document.createElement('div');
+        div.className = `entry ${isHigh ? 'high-risk' : ''}`;
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between;">
+                <span>${user}</span>
+                <span style="color:${isHigh?'var(--fn-red)':'var(--fn-blue)'}">${reason}</span>
+            </div>
+            <div style="font-size:0.6rem; color:#444; margin-top:4px;">UID: ${Math.floor(Math.random()*1000000)} | ${new Date().toLocaleTimeString()}</div>
+        `;
+        div.onclick = () => openInvestigation(user, reason);
+        
+        feed.prepend(div);
+        if(feed.children.length > 50) feed.lastChild.remove();
+        
+        setTimeout(generateReport, 1000); // 1 Report every second
     }
 
-    function openInvestigation(user) {
+    function generateTicket() {
+        if(!isOnline) return;
+        const feed = document.getElementById('support-feed');
+        const user = names[Math.floor(Math.random()*names.length)];
+        const issues = ["V-Buck Refund", "Login Loop", "Account Hack", "2FA Reset"];
+        
+        const div = document.createElement('div');
+        div.className = 'entry';
+        div.style.borderColor = 'var(--fn-yellow)';
+        div.innerHTML = `<span>${user}</span><br><span style="color:#888; font-size:0.7rem;">${issues[Math.floor(Math.random()*issues.length)]}</span>`;
+        
+        feed.prepend(div);
+        if(feed.children.length > 20) feed.lastChild.remove();
+        
+        setTimeout(generateTicket, 5000);
+    }
+
+    // --- Modal Logic ---
+    function openInvestigation(user, reason) {
         document.getElementById('modal-overlay').style.display = 'flex';
         document.getElementById('m-user').innerText = user;
         document.getElementById('m-id').innerText = "#" + Math.floor(Math.random()*900000 + 100000);
         document.getElementById('m-ip').innerText = `192.168.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
         document.getElementById('m-hwid').innerText = `HWID-${Math.floor(Math.random()*9999)}-${Math.floor(Math.random()*9999)}`;
         
-        const logs = chatSamples[Math.floor(Math.random()*chatSamples.length)];
-        document.getElementById('m-chat').innerHTML = "<strong>CHRONOLOGICAL CHAT LOGS:</strong><br>" + logs.join("<br>");
+        const logs = [
+            `[${user}]: box him box him`,
+            `[${user}]: ${reason === 'Toxic Comms' ? '#### #### ###' : 'ggs'}`,
+            `[System]: Packet Variance Detected`
+        ];
+        document.getElementById('m-chat').innerHTML = "<strong>CHRONOLOGICAL LOGS:</strong><br>" + logs.join("<br>");
     }
 
-    function execAction(type) {
+    function execProtocol(type) {
         const user = document.getElementById('m-user').innerText;
-        notify(`${type} SUCCESS: ${user} isolated.`);
+        history.push({user, type});
+        processed++;
+        document.getElementById('processed-count').innerText = processed;
+        notify(`${type} SUCCESS: ${user} REMOVED`);
         closeModal();
-        renderFeed();
+    }
+
+    function undoAction() {
+        if(history.length === 0) return notify("NO HISTORY TO REVERT");
+        const last = history.pop();
+        notify(`REVERTED: ${last.user} REINSTATED`);
+    }
+
+    // --- System UI Logic ---
+    function toggleServer() {
+        isOnline = !isOnline;
+        document.getElementById('status-dot').style.background = isOnline ? 'var(--status-green)' : 'var(--fn-red)';
+        document.getElementById('status-text').innerText = isOnline ? 'SRV_ONLINE' : 'SRV_OFFLINE';
+        document.getElementById('live-indicator').style.color = isOnline ? 'var(--fn-red)' : '#444';
+        notify(isOnline ? "OPERATIONS RESUMED" : "SYSTEM LOCKDOWN");
+        if(isOnline) { generateReport(); generateTicket(); }
     }
 
     function updatePing() {
         const monitor = document.getElementById('ping-monitor');
-        const regions = ["NA-EAST", "NA-WEST", "EUROPE (FRANKFURT)", "MIDDLE EAST", "ASIA (TOKYO)", "BRAZIL"];
+        const regions = ["NA-EAST", "NA-WEST", "EU-CENTRAL", "ME-SOUTH", "ASIA-PACIFIC", "BR-SAO"];
         monitor.innerHTML = regions.map(r => {
             const val = Math.floor(Math.random() * 40 + 10);
-            const isHigh = val > 45;
-            return `<div class="ping-item"><span>${r}</span> <span class="ping-val ${isHigh?'ping-high':''}">${val} MS</span></div>`;
+            return `<div class="ping-item"><span>${r}</span> <span class="ping-val ${val>45?'ping-high':''}">${val} MS</span></div>`;
         }).join('');
-        setTimeout(updatePing, 3000);
+        setTimeout(updatePing, 2000);
     }
 
     function reRouteTraffic() {
-        notify("RE-ROUTING TRAFFIC... OPTIMIZING CLOUD NODES");
-        setTimeout(() => notify("LATENCY STABILIZED ACROSS ALL REGIONS"), 2000);
+        notify("RE-OPTIMIZING CLOUD NODES...");
     }
 
+    function clearFeed() { document.getElementById('main-feed').innerHTML = ""; }
     function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
     function notify(m) {
         const box = document.getElementById('notify-box');
         const t = document.createElement('div');
         t.className = 'toast'; t.innerText = m;
         box.appendChild(t);
-        setTimeout(() => t.remove(), 4000);
+        setTimeout(() => t.remove(), 3000);
     }
 
-    // Init loops
+    // --- Init ---
     setInterval(() => {
+        if(!isOnline) return;
         const count = document.getElementById('player-count');
-        let current = parseInt(count.innerText.replace(/,/g, ''));
-        current += Math.floor(Math.random()*2000 - 1000);
-        count.innerText = current.toLocaleString();
-    }, 2000);
+        let val = parseInt(count.innerText.replace(/,/g, ''));
+        val += Math.floor(Math.random()*4000 - 2000);
+        count.innerText = val.toLocaleString();
+    }, 1000);
 
+    generateReport();
+    generateTicket();
     updatePing();
-    renderFeed();
 </script>
 </body>
 </html>
