@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>System Core Overlay</title>
+<style>
+  :root{
+    --bg1:#08111f;
+    --bg2:#111c32;
+    --panel:#17233a;
+    --panel2:#0d1628;
+    --line:rgba(125,160,255,.18);
+    --text:#f4f8ff;
+    --muted:#9fb0d1;
+    --accent:#7cdbff;
+    --accent2:#9f7bff;
+    --green:#5dff9a;
+    --red:#ff6b7a;
+    --yellow:#ffd166;
+  }
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family: "Arial", "Helvetica Neue", sans-serif;
+    background:
+      radial-gradient(circle at top, rgba(124,219,255,.16), transparent 32%),
+      linear-gradient(180deg, var(--bg2), var(--bg1));
+    color:var(--text);
+  }
+  .overlay{
+    width:100vw;height:100vh;
+    padding:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .panel{
+    width:min(1280px, 96vw);
+    height:min(720px, 92vh);
+    border-radius:26px;
+    background:
+      linear-gradient(180deg, rgba(26,38,64,.96), rgba(10,16,29,.96));
+    border:1px solid var(--line);
+    box-shadow: 0 30px 90px rgba(0,0,0,.5);
+    overflow:hidden;
+    display:grid;
+    grid-template-columns: 300px 1fr;
+  }
+  .sidebar{
+    background: linear-gradient(180deg, rgba(17,26,44,.96), rgba(12,18,31,.98));
+    border-right:1px solid var(--line);
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .brand{
+    padding-bottom:14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .brand .label{
+    display:inline-block;
+    padding:7px 12px;
+    border-radius:999px;
+    background: rgba(124,219,255,.12);
+    border:1px solid rgba(124,219,255,.18);
+    color:#dff6ff;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    margin-bottom:12px;
+  }
+  .brand h1{
+    margin:0;
+    font-size:30px;
+    line-height:1;
+    letter-spacing:-0.04em;
+  }
+  .brand p{
+    margin:10px 0 0;
+    color:var(--muted);
+    font-size:13px;
+  }
+  .statbox{
+    background: linear-gradient(180deg, rgba(124,219,255,.08), rgba(124,219,255,.03));
+    border:1px solid rgba(124,219,255,.16);
+    border-radius:18px;
+    padding:14px;
+  }
+  .row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:8px 0;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .pill{
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    background: rgba(93,255,154,.12);
+    color:var(--green);
+    border:1px solid rgba(93,255,154,.22);
+  }
+  .nav{
+    display:grid;
+    gap:10px;
+    margin-top:4px;
+  }
+  .nav button{
+    border:none;
+    border-radius:16px;
+    padding:14px 14px;
+    color:var(--text);
+    background: rgba(255,255,255,.04);
+    font-size:14px;
+    font-weight:700;
+    text-align:left;
+  }
+  .nav button.active{
+    background: linear-gradient(90deg, rgba(124,219,255,.18), rgba(159,123,255,.16));
+    outline:1px solid rgba(124,219,255,.22);
+  }
+  .footer{
+    margin-top:auto;
+    padding-top:14px;
+    border-top:1px solid rgba(255,255,255,.08);
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.5;
+  }
+  .content{
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    align-items:flex-start;
+  }
+  .topbar h2{
+    margin:0;
+    font-size:28px;
+    letter-spacing:-0.04em;
+  }
+  .topbar p{
+    margin:8px 0 0;
+    color:var(--muted);
+    font-size:13px;
+  }
+  .search{
+    width:min(360px, 100%);
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.04);
+    color:var(--text);
+    padding:13px 14px;
+    outline:none;
+  }
+  .cards{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:14px;
+  }
+  .card{
+    border-radius:20px;
+    padding:16px;
+    background: linear-gradient(180deg, rgba(28,41,69,.88), rgba(14,22,39,.9));
+    border:1px solid rgba(255,255,255,.08);
+    min-height:120px;
+  }
+  .card h3{margin:0 0 10px;font-size:15px}
+  .big{
+    font-size:36px;
+    font-weight:900;
+    letter-spacing:-0.05em;
+    margin-bottom:8px;
+  }
+  .muted{color:var(--muted);font-size:12px;line-height:1.5}
+  .main{
+    display:grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap:14px;
+    flex:1;
+    min-height:0;
+  }
+  .console,.logbox{
+    border-radius:20px;
+    background: rgba(6,10,18,.42);
+    border:1px solid rgba(255,255,255,.08);
+    overflow:auto;
+  }
+  .console{
+    padding:16px;
+    white-space:pre-wrap;
+    font-family: "Courier New", monospace;
+    font-size:13px;
+    line-height:1.6;
+    color:#d7f8ff;
+  }
+  .logbox{
+    padding:16px;
+  }
+  .log{
+    padding:10px 0;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    font-size:13px;
+    color:#dbe6ff;
+  }
+  .green{color:var(--green)}
+  .blue{color:var(--accent)}
+  .red{color:var(--red)}
+  .yellow{color:var(--yellow)}
+  .badge{
+    display:inline-block;
+    margin-top:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    background: rgba(124,219,255,.12);
+    color:#dff6ff;
+    border:1px solid rgba(124,219,255,.18);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .scan{
+    position:fixed;
+    inset:0;
+    background: linear-gradient(to bottom, transparent, rgba(124,219,255,.07), transparent);
+    animation: scan 4.8s linear infinite;
+    pointer-events:none;
+    mix-blend-mode:screen;
+  }
+  .crt{
+    position:fixed;
+    inset:0;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.025) 0px,
+        rgba(255,255,255,.025) 1px,
+        transparent 3px,
+        transparent 5px
+      );
+    pointer-events:none;
+  }
+  @keyframes scan{
+    0%{transform:translateY(-120px)}
+    100%{transform:translateY(110vh)}
+  }
+</style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="panel">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="label">Simulation</div>
+          <h1>System Core</h1>
+          <p>Fortnite-style fake admin dashboard for video overlay use.</p>
+        </div>
+
+        <div class="statbox">
+          <div class="row"><span>Connection</span><span class="pill">LIVE</span></div>
+          <div class="row"><span>Server region</span><span>GLOBAL</span></div>
+          <div class="row"><span>Match sync</span><span class="green">99%</span></div>
+          <div class="row"><span>Alert status</span><span class="yellow">HIGH</span></div>
+        </div>
+
+        <div class="nav">
+          <button class="active">Dashboard</button>
+          <button>Live Players</button>
+          <button>Region Monitor</button>
+          <button>Command Queue</button>
+          <button>Emergency Lock</button>
+        </div>
+
+        <div class="footer">
+          Rounded panels, bright accents, and clean HUD spacing inspired by modern game UI.
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="topbar">
+          <div>
+            <h2>Global Session Monitor</h2>
+            <p>Monitoring network activity across all regions in real time.</p>
+          </div>
+          <input class="search" value="Search player, region, action..." />
+        </div>
+
+        <section class="cards">
+          <div class="card">
+            <h3>Active Regions</h3>
+            <div class="big blue">12</div>
+            <div class="muted">All major zones currently connected to the session grid.</div>
+          </div>
+          <div class="card">
+            <h3>Queued Events</h3>
+            <div class="big green">27</div>
+            <div class="muted">Staged actions are ready for the next visual sequence.</div>
+          </div>
+          <div class="card">
+            <h3>Latency</h3>
+            <div class="big yellow">18ms</div>
+            <div class="muted">Fast enough for dramatic live overlay timing.</div>
+          </div>
+        </section>
+
+        <section class="main">
+          <div class="console">
+&gt; initializing global monitor...
+&gt; syncing region nodes...
+&gt; loading player telemetry...
+&gt; verifying command access...
+&gt; compiling visual alerts...
+&gt; <span class="green">READY</span>
+
+available actions:
+[1] boost signal
+[2] trigger warning banner
+[3] spoof countdown
+[4] send fake maintenance alert
+[5] lock interface
+[6] reveal hidden panel
+
+status:
+<span class="blue">stable</span> / <span class="yellow">watching</span> / <span class="red">high activity</span>
+          </div>
+
+          <div class="logbox">
+            <div class="log"><span class="blue">[12:04:11]</span> region link established</div>
+            <div class="log"><span class="green">[12:04:13]</span> telemetry stream active</div>
+            <div class="log"><span class="yellow">[12:04:15]</span> unusual packet burst detected</div>
+            <div class="log"><span class="red">[12:04:17]</span> alert banner queued</div>
+            <div class="log"><span class="blue">[12:04:20]</span> HUD overlay stabilized</div>
+            <div class="badge">Simulation Only</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="scan"></div>
+  <div class="crt"></div>
+</body>
+</html>
