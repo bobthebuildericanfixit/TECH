@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fortnite OG Admin | Elite Edition</title>
+    <title>Fortnite Admin | DEV LOCKER</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 
@@ -10,16 +10,17 @@
             --fn-blue: #2183fb;
             --fn-yellow: #f8fd25;
             --fn-purple: #a136f1;
+            --fn-dark: #061021;
             --slant: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
         }
 
         body {
-            margin: 0; background: radial-gradient(circle, #163a75 0%, #061021 100%);
+            margin: 0; background: radial-gradient(circle, #163a75 0%, var(--fn-dark) 100%);
             color: white; font-family: 'Anton', sans-serif; text-transform: uppercase;
             height: 100vh; overflow: hidden;
         }
 
-        /* Top Header & Account */
+        /* Header */
         header {
             background: rgba(0, 0, 0, 0.9); display: flex; align-items: center;
             padding: 0 40px; border-bottom: 4px solid var(--fn-blue); height: 70px;
@@ -35,227 +36,164 @@
         .account-badge {
             display: flex; align-items: center; gap: 10px;
             background: rgba(255,255,255,0.1); padding: 5px 15px;
-            border-radius: 4px; border-left: 4px solid var(--fn-yellow);
+            border-left: 4px solid var(--fn-yellow);
         }
-        .status-dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; }
 
-        /* Banner & Buttons */
+        /* Dev Locker Controls */
         .container { padding: 25px; }
         
-        #rotation-timer {
-            background: var(--fn-purple); color: white; padding: 12px;
-            margin-bottom: 20px; display: none; clip-path: var(--slant);
-            text-align: center; font-size: 1.2rem;
+        .locker-controls {
+            display: flex; gap: 15px; align-items: center;
+            background: rgba(0,0,0,0.4); padding: 15px; margin-bottom: 20px;
+            border: 1px solid var(--fn-blue);
         }
 
-        .action-bar { height: 60px; margin-bottom: 20px; }
-        .btn-action {
+        input[type="text"] {
+            background: #000; border: 1px solid var(--fn-blue); color: white;
+            padding: 10px; flex-grow: 1; font-family: sans-serif;
+        }
+
+        .btn-grant {
             background: var(--fn-yellow); color: #000; padding: 10px 25px;
             clip-path: var(--slant); border: none; cursor: pointer; font-family: 'Anton';
-            font-size: 1.1rem;
         }
 
-        /* Content Grids */
+        /* Item Grid */
         .grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px; max-height: 70vh; overflow-y: auto; padding-bottom: 50px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px; max-height: 70vh; overflow-y: auto; padding-bottom: 50px;
         }
-        .card { background: rgba(0,0,0,0.7); border: 2px solid var(--fn-blue); position: relative; }
-        .card img { width: 100%; height: 200px; object-fit: cover; border-bottom: 3px solid var(--fn-yellow); }
-        .card-info { padding: 12px; }
-        .price-tag { color: var(--fn-yellow); font-size: 1.2rem; }
-
-        /* Modals */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000;
+        .item-card {
+            background: rgba(0,0,0,0.8); border: 2px solid #333;
+            transition: 0.2s; cursor: pointer; position: relative;
         }
-        .modal { background: #12284c; border: 4px solid var(--fn-blue); width: 400px; padding: 25px; }
-        input, select { width: 100%; margin: 10px 0; padding: 10px; background: #000; border: 1px solid var(--fn-blue); color: #fff; }
+        .item-card:hover { border-color: var(--fn-yellow); transform: scale(1.02); }
+        .item-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #111; }
+        .item-card.granted { border-color: var(--fn-purple); }
+        .item-card.granted::after {
+            content: "GRANTED"; position: absolute; top: 5px; right: 5px;
+            background: var(--fn-purple); font-size: 0.6rem; padding: 2px 5px;
+        }
+        .item-info { padding: 8px; font-size: 0.8rem; text-align: center; }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-thumb { background: var(--fn-blue); }
+        #loading-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 2rem; color: var(--fn-yellow); display: none;
+        }
     </style>
 </head>
 <body>
 
 <header>
     <div class="nav-group">
-        <div style="font-size: 1.5rem; margin-right: 20px; color: var(--fn-blue);">EPIC_ADMIN</div>
+        <div style="font-size: 1.5rem; margin-right: 20px; color: var(--fn-blue);">EPIC_INTERNAL</div>
         <button class="nav-tab active" onclick="switchTab('news')">News Feed</button>
-        <button class="nav-tab" onclick="switchTab('shop')">Item Shop</button>
+        <button class="nav-tab" onclick="switchTab('locker')">DEV LOCKER</button>
     </div>
     
     <div class="account-badge">
-        <div class="status-dot"></div>
+        <div style="width: 8px; height: 8px; background: #4caf50; border-radius: 50%;"></div>
         <div>
-            <div style="font-size: 0.7rem; color: #aaa;">LOGGED IN AS:</div>
-            <div style="font-size: 1rem;">DEV_AUTH_01 (SUPERUSER)</div>
+            <div style="font-size: 0.7rem; color: #aaa;">LOCKER TARGET:</div>
+            <div style="font-size: 1rem;">DEV_DEBUG_USER</div>
         </div>
     </div>
 </header>
 
 <div class="container">
-    <div id="rotation-timer">
-        ADMIN QUEUE: <span id="timer-display">--:--:--</span> | 
-        GLOBAL REFRESH: <span id="global-timer">--:--:--</span>
-    </div>
+    <div id="news-view" class="grid">
+        </div>
 
-    <div class="action-bar">
-        <button id="news-btn" class="btn-action" onclick="showModal('newsModal')">Post News</button>
-        <button id="shop-btn" class="btn-action" style="display:none;" onclick="showModal('shopModal')">Add To Live Shop</button>
-    </div>
-
-    <div id="news-view" class="grid"></div>
-    <div id="shop-view" class="grid" style="display:none;"></div>
-</div>
-
-<div id="newsModal" class="modal-overlay">
-    <div class="modal">
-        <h2>Post News Asset</h2>
-        <input type="text" id="n-title" placeholder="News Headline">
-        <input type="text" id="n-img" placeholder="Image URL">
-        <input type="text" id="n-body" placeholder="Summary">
-        <button class="btn-action" style="width:100%" onclick="addNews()">Publish News</button>
-        <button onclick="hideModal('newsModal')" style="color:red; background:none; border:none; margin-top:10px; cursor:pointer;">CLOSE</button>
+    <div id="locker-view" style="display:none;">
+        <div class="locker-controls">
+            <input type="text" id="locker-search" placeholder="SEARCH ASSET REGISTRY (e.g. Renegade Raider, Midas...)" onkeyup="filterLocker()">
+            <div style="color: var(--fn-yellow); font-size: 0.8rem; margin: 0 10px;">
+                TOTAL ASSETS: <span id="asset-count">0</span>
+            </div>
+        </div>
+        <div id="locker-grid" class="grid"></div>
     </div>
 </div>
 
-<div id="shopModal" class="modal-overlay">
-    <div class="modal">
-        <h2>Shop Manual Override</h2>
-        <input type="text" id="s-name" placeholder="Item Name">
-        <input type="text" id="s-img" placeholder="Item Icon URL">
-        <input type="number" id="s-price" placeholder="V-Bucks">
-        <button class="btn-action" style="width:100%" onclick="queueShop()">Start 48h Countdown</button>
-        <button onclick="hideModal('shopModal')" style="color:red; background:none; border:none; margin-top:10px; cursor:pointer;">CLOSE</button>
-    </div>
-</div>
+<div id="loading-overlay">SYNCHRONIZING ASSETS...</div>
 
 <script>
-    let newsList = JSON.parse(localStorage.getItem('fn_news')) || [];
-    let customShop = JSON.parse(localStorage.getItem('fn_shop')) || [];
+    let allAssets = [];
+    let grantedIds = JSON.parse(localStorage.getItem('granted_items')) || [];
 
-    // --- Tab Switching Logic ---
     function switchTab(tab) {
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
 
-        // Toggle Views
         document.getElementById('news-view').style.display = tab === 'news' ? 'grid' : 'none';
-        document.getElementById('shop-view').style.display = tab === 'shop' ? 'grid' : 'none';
+        document.getElementById('locker-view').style.display = tab === 'locker' ? 'block' : 'none';
 
-        // Toggle Buttons (The fix you asked for)
-        document.getElementById('news-btn').style.display = tab === 'news' ? 'block' : 'none';
-        document.getElementById('shop-btn').style.display = tab === 'shop' ? 'block' : 'none';
-
-        if(tab === 'shop') renderShop();
+        if(tab === 'locker' && allAssets.length === 0) fetchAllAssets();
     }
 
-    // --- Modal Logic ---
-    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
-
-    // --- News Logic ---
-    async function initNews() {
-        if(newsList.length === 0) {
-            const res = await fetch('https://fortnite-api.com/v2/news/br');
-            const data = await res.json();
-            newsList = data.data.motds;
-        }
-        renderNews();
-    }
-
-    function renderNews() {
-        document.getElementById('news-view').innerHTML = newsList.map(n => `
-            <div class="card">
-                <img src="${n.image || n.img}">
-                <div class="card-info">
-                    <h3>${n.title}</h3>
-                    <p style="font-family:sans-serif; text-transform:none; font-size:0.8rem; color:#ccc;">${n.body}</p>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function addNews() {
-        const title = document.getElementById('n-title').value;
-        const img = document.getElementById('n-img').value;
-        const body = document.getElementById('n-body').value;
-        newsList.unshift({ title, img, body });
-        localStorage.setItem('fn_news', JSON.stringify(newsList));
-        renderNews();
-        hideModal('newsModal');
-    }
-
-    // --- Shop Logic & Countdown ---
-    async function renderShop() {
-        const shopView = document.getElementById('shop-view');
-        const res = await fetch('https://fortnite-api.com/v2/shop/br');
+    // Load News
+    async function loadNews() {
+        const res = await fetch('https://fortnite-api.com/v2/news/br');
         const data = await res.json();
-        const liveItems = data.data.featured.entries.flatMap(e => e.items);
-
-        const allItems = [...customShop, ...liveItems];
-
-        shopView.innerHTML = allItems.map(item => `
-            <div class="card">
-                <img src="${item.images ? item.images.icon : item.img}">
-                <div class="card-info">
-                    <h3>${item.name}</h3>
-                    <div class="price-tag">${item.price || '800'} V-BUCKS</div>
-                </div>
+        document.getElementById('news-view').innerHTML = data.data.motds.map(n => `
+            <div class="item-card" style="width:100%; cursor:default;">
+                <img src="${n.image}" style="aspect-ratio:16/9">
+                <div class="item-info"><h3>${n.title}</h3></div>
             </div>
         `).join('');
     }
 
-    function queueShop() {
-        const name = document.getElementById('s-name').value;
-        const img = document.getElementById('s-img').value;
-        const price = document.getElementById('s-price').value;
-        
-        customShop.unshift({ name, img, price });
-        localStorage.setItem('fn_shop', JSON.stringify(customShop));
-        
-        const target = new Date().getTime() + (48 * 60 * 60 * 1000);
-        localStorage.setItem('rotation_end', target);
-        
-        renderShop();
-        startTimers();
-        hideModal('shopModal');
+    // Load All Items for Dev Locker
+    async function fetchAllAssets() {
+        document.getElementById('loading-overlay').style.display = 'block';
+        try {
+            const res = await fetch('https://fortnite-api.com/v2/cosmetics/br');
+            const json = await res.json();
+            allAssets = json.data;
+            document.getElementById('asset-count').innerText = allAssets.length;
+            renderLocker(allAssets.slice(0, 100)); // Show first 100 initially
+        } catch (e) {
+            console.error("Failed to fetch assets");
+        }
+        document.getElementById('loading-overlay').style.display = 'none';
     }
 
-    function startTimers() {
-        const adminEnd = localStorage.getItem('rotation_end');
-        if(adminEnd) document.getElementById('rotation-timer').style.display = 'block';
+    function renderLocker(items) {
+        const grid = document.getElementById('locker-grid');
+        grid.innerHTML = items.map(item => {
+            const isGranted = grantedIds.includes(item.id);
+            return `
+                <div class="item-card ${isGranted ? 'granted' : ''}" onclick="grantItem('${item.id}', '${item.name}')">
+                    <img src="${item.images.icon || item.images.smallIcon}" loading="lazy">
+                    <div class="item-info">
+                        <div style="font-size:0.7rem; color:var(--fn-blue)">${item.type.value}</div>
+                        <div>${item.name}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 
-        setInterval(() => {
-            const now = new Date().getTime();
-            
-            // 1. Admin Queue Timer
-            if(adminEnd) {
-                const dist = adminEnd - now;
-                const h = Math.floor(dist / (1000 * 60 * 60));
-                const m = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((dist % (1000 * 60)) / 1000);
-                document.getElementById('timer-display').innerHTML = `${h}H ${m}M ${s}S`;
-            }
+    function filterLocker() {
+        const term = document.getElementById('locker-search').value.toLowerCase();
+        const filtered = allAssets.filter(a => a.name.toLowerCase().includes(term)).slice(0, 100);
+        renderLocker(filtered);
+    }
 
-            // 2. Fake Global Timer (Resetting every night at midnight)
-            const midnight = new Date();
-            midnight.setHours(24, 0, 0, 0);
-            const globalDist = midnight.getTime() - now;
-            const gh = Math.floor(globalDist / (1000 * 60 * 60));
-            const gm = Math.floor((globalDist % (1000 * 60 * 60)) / (1000 * 60));
-            const gs = Math.floor((globalDist % (1000 * 60)) / 1000);
-            document.getElementById('global-timer').innerHTML = `${gh}H ${gm}M ${gs}S`;
-
-        }, 1000);
+    function grantItem(id, name) {
+        if(grantedIds.includes(id)) {
+            alert(`ASSET REVOKED: ${name} removed from Dev Account.`);
+            grantedIds = grantedIds.filter(i => i !== id);
+        } else {
+            alert(`ASSET GRANTED: ${name} pushed to DEV_DEBUG_USER. Please restart game client.`);
+            grantedIds.push(id);
+        }
+        localStorage.setItem('granted_items', JSON.stringify(grantedIds));
+        filterLocker(); // Refresh display
     }
 
     // Init
-    initNews();
-    startTimers();
+    loadNews();
 </script>
 
 </body>
