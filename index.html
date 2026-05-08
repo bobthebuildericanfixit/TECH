@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EPIC_INTERNAL // V9_ADMIN</title>
+    <title>FN_INTERNAL // GLOBAL_OPS</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 
@@ -11,6 +11,7 @@
             --fn-yellow: #f8fd25;
             --fn-red: #ff4141;
             --fn-purple: #a136f1;
+            --status-green: #4caf50;
             --slant: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
         }
 
@@ -20,260 +21,315 @@
             height: 100vh; overflow: hidden;
         }
 
-        /* Header */
+        /* Header & Stats */
         header {
             background: rgba(0, 0, 0, 0.95); display: flex; align-items: center;
-            padding: 0 40px; border-bottom: 4px solid var(--fn-blue); height: 60px;
+            padding: 0 30px; border-bottom: 4px solid var(--fn-blue); height: 75px;
             justify-content: space-between;
         }
+
+        .stat-box { text-align: center; border-right: 1px solid #333; padding: 0 20px; }
+        .stat-val { color: var(--fn-yellow); font-size: 1.2rem; display: block; }
+        .stat-lbl { font-size: 0.6rem; color: #888; }
+
+        /* Nav */
         .nav-tab {
-            background: #313131; padding: 5px 20px; clip-path: var(--slant);
-            cursor: pointer; border: none; color: #888; font-family: 'Anton'; margin: 0 2px;
+            background: #222; padding: 8px 18px; clip-path: var(--slant);
+            cursor: pointer; border: none; color: #666; font-family: 'Anton'; margin: 0 3px;
         }
         .nav-tab.active { background: var(--fn-blue); color: white; }
 
-        .container { padding: 20px; height: calc(100vh - 80px); }
+        .container { padding: 20px; height: calc(100vh - 100px); overflow: hidden; }
 
-        /* Reports Section */
-        .report-feed {
-            background: rgba(0,0,0,0.85); border: 2px solid var(--fn-red);
-            height: 70vh; overflow-y: auto; padding: 10px;
+        /* Server Toggle */
+        .status-toggle {
+            display: flex; align-items: center; gap: 10px;
+            padding: 5px 15px; background: #111; border: 1px solid #333; cursor: pointer;
         }
-        .report-entry {
-            display: grid; grid-template-columns: 100px 1.5fr 1fr 220px;
-            background: #111; margin-bottom: 4px; padding: 12px;
-            border-left: 4px solid var(--fn-red); align-items: center;
-        }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--status-green); }
+        .status-critical .status-dot { background: var(--fn-red); box-shadow: 0 0 10px var(--fn-red); }
 
-        /* Dev Locker Style */
-        .locker-layout { display: grid; grid-template-columns: 1fr 350px; gap: 20px; height: 75vh; }
-        .asset-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px; overflow-y: auto; padding-right: 10px;
-        }
-        .asset-card { 
-            background: #000; border: 1px solid #333; cursor: pointer; position: relative;
-            transition: 0.2s;
-        }
+        /* Gifting View */
+        .gift-container { display: grid; grid-template-columns: 1fr 350px; gap: 20px; height: 100%; }
+        .asset-search-area { background: rgba(0,0,0,0.4); padding: 15px; overflow-y: auto; }
+        .grid-assets { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+        .asset-card { background: #000; border: 1px solid #333; padding: 5px; cursor: pointer; }
         .asset-card:hover { border-color: var(--fn-yellow); }
         .asset-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
-        .asset-card p { font-size: 0.65rem; margin: 5px; text-align: center; white-space: nowrap; overflow: hidden; }
 
-        .granted-panel { background: rgba(0,0,0,0.5); border-left: 2px solid var(--fn-purple); padding: 15px; overflow-y: auto; }
+        /* Match Logs */
+        .log-feed { background: #000; border: 1px solid #222; height: 75vh; overflow-y: auto; font-family: monospace; padding: 10px; font-size: 0.8rem; }
+        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #111; padding: 5px 0; }
+        .log-active { color: var(--status-green); }
+        .log-inactive { color: #555; }
 
-        /* Tournament Cards */
-        .tourney-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .tourney-card { background: #000; border: 2px solid var(--fn-blue); position: relative; }
-        .tourney-card img { width: 100%; border-bottom: 3px solid var(--fn-yellow); }
-        .reward-badge { position: absolute; top: 10px; right: 10px; background: var(--fn-yellow); color: black; padding: 2px 10px; font-size: 0.9rem; }
-
-        .btn-action { background: var(--fn-yellow); color: #000; padding: 6px 15px; clip-path: var(--slant); border: none; cursor: pointer; font-family: 'Anton'; }
-        .btn-undo { background: #555; color: white; padding: 4px 10px; clip-path: var(--slant); border: none; cursor: pointer; font-family: 'Anton'; }
-        
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000;
+        /* Notifications (Custom Popups) */
+        #notification-box {
+            position: fixed; bottom: 20px; right: 20px; z-index: 2000;
+            display: flex; flex-direction: column; gap: 10px;
         }
-        .modal { background: #12284c; border: 4px solid var(--fn-blue); width: 400px; padding: 25px; }
-        input { width: 100%; margin: 10px 0; padding: 10px; background: #000; color: #fff; border: 1px solid var(--fn-blue); box-sizing: border-box; }
+        .toast {
+            background: var(--fn-blue); color: white; padding: 15px 25px;
+            clip-path: var(--slant); animation: slideIn 0.3s ease;
+            min-width: 250px; border-left: 5px solid var(--fn-yellow);
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1500;
+        }
+        .modal { background: #12284c; border: 4px solid var(--fn-blue); width: 400px; padding: 30px; text-align: center; }
+        input { width: 100%; margin: 10px 0; padding: 12px; background: #000; color: white; border: 1px solid var(--fn-blue); box-sizing: border-box; }
+        
+        .btn-prime { background: var(--fn-yellow); color: #000; border: none; padding: 10px 20px; clip-path: var(--slant); cursor: pointer; font-family: 'Anton'; width: 100%; }
     </style>
 </head>
 <body>
 
 <header>
     <div style="display: flex; align-items: center;">
-        <button class="nav-tab active" onclick="switchTab('reports')">Live Reports</button>
-        <button class="nav-tab" onclick="switchTab('tournaments')">Tournaments</button>
-        <button class="nav-tab" onclick="switchTab('locker')">Dev Locker</button>
+        <div class="stat-box">
+            <span class="stat-lbl">LIVE PLAYERS</span>
+            <span class="stat-val" id="live-count">1,402,256</span>
+        </div>
+        <div class="stat-box" style="border:none;">
+            <div id="server-toggle" class="status-toggle" onclick="toggleServer()">
+                <div class="status-dot"></div>
+                <span id="status-text">SYSTEMS: OPERATIONAL</span>
+            </div>
+        </div>
     </div>
-    <div style="font-size: 0.8rem; color: var(--fn-yellow);">INTERNAL_DEV_V9 // STATUS: ONLINE</div>
+
+    <nav>
+        <button class="nav-tab active" onclick="switchTab('reports')">Reports</button>
+        <button class="nav-tab" onclick="switchTab('gift')">Gift Center</button>
+        <button class="nav-tab" onclick="switchTab('logs')">Match Logs</button>
+        <button class="nav-tab" onclick="switchTab('tournaments')">Tournaments</button>
+    </nav>
+
+    <div style="font-size: 0.8rem; letter-spacing: 1px;">AUTH: <span style="color:var(--fn-blue)">SUP_ADMIN_99</span></div>
 </header>
 
 <div class="container">
     <div id="view-reports">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h2 style="color:var(--fn-red)">Active Report Queue</h2>
-            <button class="btn-undo" onclick="undoAction()">UNDO PREVIOUS ACTION</button>
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <h2 style="color:var(--fn-red)">Global Reports (Real-time)</h2>
+            <button class="nav-tab" style="background:#444; color:white;" onclick="undoAction()">Undo Last</button>
         </div>
-        <div class="report-feed" id="report-container"></div>
+        <div class="log-feed" id="report-container" style="height: 70vh; background: rgba(0,0,0,0.5);"></div>
+    </div>
+
+    <div id="view-gift" style="display:none;">
+        <div class="gift-container">
+            <div class="asset-search-area">
+                <input type="text" id="gift-search" placeholder="SEARCH COSMETIC DATABASE..." onkeyup="searchGifts()">
+                <div class="grid-assets" id="gift-grid"></div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-left: 2px solid var(--fn-yellow);">
+                <h3>Gift Protocol</h3>
+                <label>Target Username</label>
+                <input type="text" id="gift-target" placeholder="Recipient (e.g. TZ_Ryz)">
+                <label>Message (Optional)</label>
+                <input type="text" id="gift-msg" placeholder="Enjoy the skin!">
+                <div id="selected-preview" style="margin: 20px 0; background: #000; padding: 10px; border: 1px dashed #555;">
+                    No Item Selected
+                </div>
+                <button class="btn-prime" onclick="processGift()">SEND GIFT</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-logs" style="display:none;">
+        <h2 style="color:var(--fn-blue)">Match Activity Logs</h2>
+        <div class="log-feed" id="match-logs"></div>
     </div>
 
     <div id="view-tournaments" style="display:none;">
-        <button class="btn-action" style="margin-bottom:15px;" onclick="showModal('tourneyModal')">Schedule New Tournament</button>
-        <div class="tourney-grid" id="tourney-grid"></div>
-    </div>
-
-    <div id="view-locker" style="display:none;">
-        <div class="locker-layout">
-            <div>
-                <input type="text" id="asset-search" placeholder="Search Global Registry..." onkeyup="searchAssets()">
-                <div class="asset-grid" id="asset-grid"></div>
-            </div>
-            <div class="granted-panel">
-                <h3 style="color:var(--fn-purple)">Granted Assets (Target: Dev_01)</h3>
-                <div id="granted-list"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="banModal" class="modal-overlay">
-    <div class="modal">
-        <h3 id="ban-title">Action Title</h3>
-        <label style="font-size: 0.8rem;">Duration (Hours)</label>
-        <input type="number" id="ban-qty" value="72">
-        <button id="ban-exec" class="btn-action" style="width:100%">Confirm Protocol</button>
-        <button onclick="hideModal('banModal')" style="background:none; border:none; color:red; width:100%; margin-top:10px; cursor:pointer;">ABORT</button>
+        <button class="btn-prime" style="width: auto; margin-bottom: 20px;" onclick="showModal('tourneyModal')">Create Tournament</button>
+        <div class="grid-assets" id="tourney-grid"></div>
     </div>
 </div>
 
 <div id="tourneyModal" class="modal-overlay">
     <div class="modal">
-        <h3>Create Competition</h3>
-        <input type="text" id="t-name" placeholder="Name">
-        <input type="text" id="t-reward" placeholder="Reward (e.g. 50,000 V-Bucks + Trophy)">
-        <input type="text" id="t-img" placeholder="Image URL">
-        <button class="btn-action" style="width:100%" onclick="addTournament()">Publish Event</button>
-        <button onclick="hideModal('tourneyModal')" style="background:none; border:none; color:red; width:100%; margin-top:10px; cursor:pointer;">CANCEL</button>
+        <h3>Publish Competitive Event</h3>
+        <input type="text" id="t-name" placeholder="Tournament Name">
+        <input type="text" id="t-reward" placeholder="Reward (V-Bucks/Prizes)">
+        <input type="text" id="t-img" placeholder="Banner URL">
+        <button class="btn-prime" onclick="addTournament()">PUBLISH</button>
+        <button onclick="hideModal('tourneyModal')" style="background:none; border:none; color:red; cursor:pointer; margin-top:10px;">CANCEL</button>
     </div>
 </div>
 
+<div id="notification-box"></div>
+
 <script>
-    let reports = JSON.parse(localStorage.getItem('v9_reports')) || [];
-    let tourneys = JSON.parse(localStorage.getItem('v9_tourneys')) || [];
-    let grantedAssets = JSON.parse(localStorage.getItem('v9_granted')) || [];
-    let allAssets = [];
+    let reports = [];
     let history = [];
+    let allAssets = [];
+    let selectedAsset = null;
+    let tourneys = JSON.parse(localStorage.getItem('v10_tourneys')) || [];
 
-    const sweatyPrefixes = ["v_", "TZ_", "Not_", "Parallel_", "77_", "Lxsh_", "Cold_", "Snypr_", "Faded_", "Pure_"];
-    const sweatyRoots = ["Shifted", "Ryz", "Aqua", "Dusk", "Vibe", "Clix", "Mongy", "Siphon", "Logic", "Kyl"];
-
-    // --- Tab Logic ---
+    // --- Tab System ---
     function switchTab(v) {
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         event.target.classList.add('active');
-        ['reports','tournaments','locker'].forEach(id => {
+        ['reports','gift','logs','tournaments'].forEach(id => {
             document.getElementById('view-'+id).style.display = (id === v) ? 'block' : 'none';
         });
-        if(v === 'locker' && allAssets.length === 0) fetchAssets();
-        if(v === 'tournaments') renderTournaments();
+        if(v === 'gift' && allAssets.length === 0) fetchAssets();
+        if(v === 'logs') populateLogs();
     }
 
-    // --- Sweaty Reports Logic ---
-    function generateReport() {
-        const pre = sweatyPrefixes[Math.floor(Math.random() * sweatyPrefixes.length)];
-        const root = sweatyRoots[Math.floor(Math.random() * sweatyRoots.length)];
-        const name = pre + root; // Clean, non-numeric sweaty names
+    // --- Real-time Player Count (Live 2026 Sim) ---
+    function updatePlayerCount() {
+        const base = 1350000;
+        const drift = Math.floor(Math.random() * 50000);
+        document.getElementById('live-count').innerText = (base + drift).toLocaleString();
+        setTimeout(updatePlayerCount, 3000);
+    }
 
+    // --- Server Toggle ---
+    function toggleServer() {
+        const el = document.getElementById('server-toggle');
+        const txt = document.getElementById('status-text');
+        if(el.classList.contains('status-critical')) {
+            el.classList.remove('status-critical');
+            txt.innerText = "SYSTEMS: OPERATIONAL";
+            notify("All services restored to OPERATIONAL.");
+        } else {
+            el.classList.add('status-critical');
+            txt.innerText = "SYSTEMS: CRITICAL OUTAGE";
+            notify("Emergency: Triggering global server downtime.");
+        }
+    }
+
+    // --- Custom Notifications (No Alert!) ---
+    function notify(msg) {
+        const box = document.getElementById('notification-box');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        box.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    // --- Gifting System ---
+    async function fetchAssets() {
+        const res = await fetch('https://fortnite-api.com/v2/cosmetics/br');
+        const json = await res.json();
+        allAssets = json.data;
+        renderAssets(allAssets.slice(0, 48));
+    }
+
+    function renderAssets(items) {
+        const grid = document.getElementById('gift-grid');
+        grid.innerHTML = items.map(item => `
+            <div class="asset-card" onclick="selectItem('${item.id}', '${item.name}', '${item.images.icon}')">
+                <img src="${item.images.icon}">
+                <p style="font-size:0.6rem; text-align:center;">${item.name}</p>
+            </div>
+        `).join('');
+    }
+
+    function selectItem(id, name, img) {
+        selectedAsset = {id, name, img};
+        document.getElementById('selected-preview').innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px;">
+                <img src="${img}" style="width:50px;">
+                <span>${name}</span>
+            </div>
+        `;
+    }
+
+    function processGift() {
+        const target = document.getElementById('gift-target').value;
+        if(!target || !selectedAsset) return notify("Error: Missing target or item selection.");
+        notify(`GIFT SUCCESS: Sent ${selectedAsset.name} to ${target}.`);
+        document.getElementById('gift-target').value = "";
+    }
+
+    function searchGifts() {
+        const val = document.getElementById('gift-search').value.toLowerCase();
+        const filtered = allAssets.filter(a => a.name.toLowerCase().includes(val)).slice(0, 48);
+        renderAssets(filtered);
+    }
+
+    // --- Match Logs ---
+    function populateLogs() {
+        const logs = document.getElementById('match-logs');
+        const prefixes = ["EU_", "NAW_", "ASIA_"];
+        const gameModes = ["Solo", "Duo", "Arena", "Ranked ZB"];
+        
+        let html = "";
+        for(let i=0; i<30; i++) {
+            const isActive = Math.random() > 0.3;
+            html += `
+                <div class="log-entry">
+                    <span class="${isActive ? 'log-active' : 'log-inactive'}">${isActive ? '[ACTIVE]' : '[INACTIVE]'}</span>
+                    MatchID: ${Math.floor(Math.random()*999999)} | 
+                    Server: ${prefixes[Math.floor(Math.random()*3)]}${Math.floor(Math.random()*100)} | 
+                    Mode: ${gameModes[Math.floor(Math.random()*4)]} | 
+                    Players: ${Math.floor(Math.random()*100)}/100
+                </div>
+            `;
+        }
+        logs.innerHTML = html;
+    }
+
+    // --- Reports ---
+    const sweatyNames = ["v_Shifted", "TZ_Ryz", "Not_Aqua", "Cold_Logic", "Snypr_cc", "Faded_v"];
+    function generateReport() {
+        const name = sweatyNames[Math.floor(Math.random()*sweatyNames.length)] + "_" + Math.floor(Math.random()*99);
         const report = {
             id: Date.now(),
             user: name,
-            reason: ["Aimbot", "Wallhack", "Toxic Behavior", "Teaming"][Math.floor(Math.random()*4)],
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            reason: ["Aimbot", "Wallhack", "Griefing"][Math.floor(Math.random()*3)],
+            time: new Date().toLocaleTimeString()
         };
         reports.unshift(report);
-        if(reports.length > 40) reports.pop();
-        saveAndRender();
+        if(reports.length > 20) reports.pop();
+        renderReports();
         setTimeout(generateReport, Math.random() * 4000 + 1000);
     }
 
     function renderReports() {
         const cont = document.getElementById('report-container');
         cont.innerHTML = reports.map(r => `
-            <div class="report-entry">
-                <span style="color:#666">${r.time}</span>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 200px; padding:10px; border-bottom:1px solid #222;">
+                <span>${r.time}</span>
                 <span style="color:var(--fn-yellow)">${r.user}</span>
                 <span style="color:var(--fn-red)">${r.reason}</span>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn-action" onclick="prepAction('${r.user}', ${r.id}, 'GAME')">BAN</button>
-                    <button class="btn-action" style="background:var(--fn-purple); color:white;" onclick="prepAction('${r.user}', ${r.id}, 'SOCIAL')">SOC</button>
-                </div>
+                <button class="btn-prime" style="font-size:0.7rem; padding:4px;" onclick="banUser(${r.id})">BAN USER</button>
             </div>
         `).join('');
     }
 
-    function prepAction(user, id, type) {
-        document.getElementById('ban-title').innerText = `${type} ACTION: ${user}`;
-        document.getElementById('ban-exec').onclick = () => executeAction(id);
-        showModal('banModal');
-    }
-
-    function executeAction(id) {
+    function banUser(id) {
         const idx = reports.findIndex(r => r.id === id);
-        if(idx > -1) {
-            history.push({index: idx, data: reports[idx]});
-            reports.splice(idx, 1);
-            saveAndRender();
-            hideModal('banModal');
-        }
+        history.push({index: idx, data: reports[idx]});
+        reports.splice(idx, 1);
+        renderReports();
+        notify("Account Access Revoked Successfully.");
     }
 
     function undoAction() {
-        if(history.length === 0) return alert("Nothing to undo!");
+        if(history.length === 0) return notify("Nothing to undo.");
         const last = history.pop();
         reports.splice(last.index, 0, last.data);
         renderReports();
     }
 
-    // --- Dev Locker Logic ---
-    async function fetchAssets() {
-        const res = await fetch('https://fortnite-api.com/v2/cosmetics/br');
-        const json = await res.json();
-        allAssets = json.data;
-        renderLocker(allAssets.slice(0, 50));
-        renderGranted();
-    }
-
-    function renderLocker(items) {
-        const grid = document.getElementById('asset-grid');
-        grid.innerHTML = items.map(item => `
-            <div class="asset-card" onclick="grantAsset('${item.id}')">
-                <img src="${item.images.icon}" loading="lazy">
-                <p>${item.name}</p>
-            </div>
-        `).join('');
-    }
-
-    function searchAssets() {
-        const val = document.getElementById('asset-search').value.toLowerCase();
-        const filtered = allAssets.filter(a => a.name.toLowerCase().includes(val)).slice(0, 50);
-        renderLocker(filtered);
-    }
-
-    function grantAsset(id) {
-        const item = allAssets.find(a => a.id === id);
-        if(!grantedAssets.some(a => a.id === id)) {
-            grantedAssets.unshift({id: item.id, name: item.name, img: item.images.icon});
-            localStorage.setItem('v9_granted', JSON.stringify(grantedAssets));
-            renderGranted();
-        }
-    }
-
-    function renderGranted() {
-        const cont = document.getElementById('granted-list');
-        cont.innerHTML = grantedAssets.map(a => `
-            <div style="display:flex; align-items:center; gap:10px; background:#111; margin-bottom:5px; padding:5px; border-left:3px solid var(--fn-purple);">
-                <img src="${a.img}" style="width:40px;">
-                <span style="font-size:0.8rem;">${a.name}</span>
-                <span style="margin-left:auto; color:red; cursor:pointer;" onclick="revokeAsset('${a.id}')">X</span>
-            </div>
-        `).join('');
-    }
-
-    function revokeAsset(id) {
-        grantedAssets = grantedAssets.filter(a => a.id !== id);
-        localStorage.setItem('v9_granted', JSON.stringify(grantedAssets));
-        renderGranted();
-    }
-
-    // --- Tournaments Logic ---
-    function renderTournaments() {
+    // --- Tournaments ---
+    function renderTourneys() {
         const grid = document.getElementById('tourney-grid');
         grid.innerHTML = tourneys.map(t => `
-            <div class="tourney-card">
-                <div class="reward-badge">${t.reward}</div>
-                <img src="${t.img || 'https://placehold.co/600x300/000/fff?text=TOURNAMENT'}">
-                <div style="padding:15px;"><h3>${t.name}</h3></div>
+            <div style="background:#000; border:2px solid var(--fn-blue); position:relative;">
+                <div style="background:var(--fn-yellow); color:black; padding:2px 10px; position:absolute; top:5px; right:5px;">${t.reward}</div>
+                <img src="${t.img || 'https://placehold.co/600x300/000/fff?text=COMPETITIVE'}" style="width:100%;">
+                <div style="padding:10px;">${t.name}</div>
             </div>
         `).join('');
     }
@@ -282,26 +338,20 @@
         const name = document.getElementById('t-name').value;
         const reward = document.getElementById('t-reward').value;
         const img = document.getElementById('t-img').value;
-        if(name && reward) {
-            tourneys.unshift({name, reward, img});
-            localStorage.setItem('v9_tourneys', JSON.stringify(tourneys));
-            renderTournaments();
-            hideModal('tourneyModal');
-        }
+        tourneys.unshift({name, reward, img});
+        localStorage.setItem('v10_tourneys', JSON.stringify(tourneys));
+        renderTourneys();
+        hideModal('tourneyModal');
+        notify(`TOURNAMENT PUBLISHED: ${name}`);
     }
 
-    // --- Utils ---
-    function saveAndRender() {
-        localStorage.setItem('v9_reports', JSON.stringify(reports));
-        renderReports();
-    }
     function showModal(id) { document.getElementById(id).style.display = 'flex'; }
     function hideModal(id) { document.getElementById(id).style.display = 'none'; }
 
     // Init
+    updatePlayerCount();
     generateReport();
-    renderReports();
+    renderTourneys();
 </script>
-
 </body>
 </html>
