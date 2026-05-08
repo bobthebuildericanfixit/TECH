@@ -2,141 +2,168 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EPIC_INTERNAL // LEGACY_DASH</title>
+    <title>EPIC_SYSTEMS // NOC_V13</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
         :root {
-            --fn-blue: #2183fb; --fn-yellow: #f8fd25; --fn-red: #ff4141; --status-green: #4caf50;
-            --bg-dark: #061021; --panel-bg: rgba(0, 0, 0, 0.85);
+            --fn-blue: #2183fb; --fn-yellow: #f8fd25; --fn-red: #ff4141; --fn-purple: #a136f1;
+            --status-green: #4caf50; --panel-bg: rgba(0, 0, 0, 0.9);
         }
         body {
-            margin: 0; background: radial-gradient(circle, #163a75 0%, var(--bg-dark) 100%);
+            margin: 0; background: radial-gradient(circle, #1a1a1a 0%, #050505 100%);
             color: white; font-family: 'Anton', sans-serif; text-transform: uppercase;
-            height: 100vh; overflow: hidden;
+            height: 100vh; overflow: hidden; font-size: 14px;
         }
+        
+        /* Header Stats Bar */
         header {
             background: #000; display: flex; align-items: center; padding: 0 20px;
-            border-bottom: 3px solid var(--fn-blue); height: 65px; justify-content: space-between;
+            border-bottom: 2px solid var(--fn-blue); height: 70px; justify-content: space-between;
         }
+        .header-stat { border-left: 1px solid #222; padding: 0 15px; }
+        .val { color: var(--fn-yellow); font-size: 1.1rem; display: block; }
+        .lbl { font-size: 0.6rem; color: #666; }
+
+        /* Navigation */
+        nav { display: flex; background: #111; padding: 5px; gap: 5px; }
         .nav-btn {
-            background: #222; padding: 10px 20px; border: none; color: #888;
-            cursor: pointer; font-family: 'Anton'; margin-right: 5px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+            background: transparent; border: none; color: #555; padding: 10px 20px;
+            cursor: pointer; font-family: 'Anton'; transition: 0.2s;
         }
-        .nav-btn.active { background: var(--fn-blue); color: white; }
-        
-        .container { display: grid; grid-template-columns: 1fr 400px; gap: 20px; padding: 20px; height: calc(100vh - 110px); }
-        .main-panel { background: var(--panel-bg); border: 2px solid #111; overflow-y: auto; padding: 15px; }
-        .side-panel { background: rgba(0,0,0,0.9); border-left: 2px solid var(--fn-blue); padding: 20px; display: flex; flex-direction: column; }
+        .nav-btn.active { color: var(--fn-blue); border-bottom: 2px solid var(--fn-blue); }
 
-        /* Report & Ticket Styling */
-        .entry {
-            background: #111; border-left: 4px solid var(--fn-blue); margin-bottom: 8px;
-            padding: 12px; cursor: pointer; transition: 0.2s; position: relative;
-        }
-        .entry:hover { background: #1a1a1a; transform: scale(1.01); }
-        .entry.report { border-color: var(--fn-red); }
-        .entry.ticket { border-color: var(--fn-yellow); }
-        .entry-meta { font-size: 0.7rem; color: #666; margin-bottom: 5px; display: flex; justify-content: space-between; }
-        
-        /* Gift Section */
-        .gift-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; max-height: 300px; overflow-y: auto; margin: 10px 0; border: 1px solid #333; padding: 5px; }
-        .item-card { background: #000; border: 1px solid #222; cursor: pointer; text-align: center; font-size: 0.6rem; }
-        .item-card.selected { border-color: var(--fn-yellow); box-shadow: 0 0 10px var(--fn-yellow); }
-        .item-card img { width: 100%; }
+        /* Main Layout */
+        .container { display: grid; grid-template-columns: 300px 1fr 300px; gap: 15px; padding: 15px; height: calc(100vh - 130px); }
+        .panel { background: var(--panel-bg); border: 1px solid #222; display: flex; flex-direction: column; overflow: hidden; }
+        .panel-header { background: #111; padding: 10px; font-size: 0.8rem; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
 
-        input, select, textarea { 
-            width: 100%; background: #000; border: 1px solid var(--fn-blue); 
-            color: white; padding: 10px; margin-bottom: 10px; font-family: sans-serif;
+        /* Feeds */
+        .scroll-area { flex-grow: 1; overflow-y: auto; padding: 10px; }
+        .entry { 
+            background: #0a0a0a; border-left: 3px solid var(--fn-blue); 
+            padding: 10px; margin-bottom: 8px; cursor: pointer; transition: 0.1s;
         }
-        .btn-action { background: var(--fn-yellow); color: #000; border: none; padding: 12px; cursor: pointer; font-family: 'Anton'; width: 100%; }
-        
-        /* Modal for Details */
-        #detail-modal {
-            position: fixed; top: 0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100;
-        }
-        .modal-box { background: #0b1a33; border: 4px solid var(--fn-blue); width: 500px; padding: 30px; }
+        .entry:hover { background: #151515; }
+        .entry.high-risk { border-color: var(--fn-red); }
 
-        #notify { position: fixed; bottom: 20px; left: 20px; z-index: 1000; }
-        .toast { background: var(--fn-blue); color: #fff; padding: 15px 30px; margin-top: 10px; border-left: 5px solid var(--fn-yellow); animation: slide 0.3s ease; }
-        @keyframes slide { from { transform: translateX(-100%); } }
+        /* Detail Modal */
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-box { background: #050505; border: 2px solid var(--fn-blue); width: 650px; padding: 30px; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .data-item { background: #111; padding: 10px; border: 1px solid #222; }
+        .chat-log { background: #000; font-family: monospace; padding: 10px; color: #888; font-size: 0.75rem; border: 1px solid #333; margin: 10px 0; }
+
+        /* UI Elements */
+        .btn { padding: 10px; border: none; font-family: 'Anton'; cursor: pointer; width: 100%; margin-top: 5px; }
+        .btn-red { background: var(--fn-red); color: white; }
+        .btn-purple { background: var(--fn-purple); color: white; }
+        .btn-yellow { background: var(--fn-yellow); color: black; }
+
+        .ping-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #111; font-size: 0.8rem; }
+        .ping-val { color: var(--status-green); }
+        .ping-high { color: var(--fn-red); font-weight: bold; }
+
+        #notify-box { position: fixed; bottom: 20px; right: 20px; z-index: 2000; }
+        .toast { background: var(--fn-blue); padding: 15px 25px; margin-top: 5px; border-left: 5px solid var(--fn-yellow); animation: slide 0.3s ease; }
+        @keyframes slide { from { transform: translateX(100%); } }
     </style>
 </head>
 <body>
 
 <header>
     <div style="display: flex; align-items: center;">
-        <div id="player-stat" style="margin-right: 30px;">
-            <span style="color:#888; font-size:0.7rem;">CONCURRENT_USERS</span><br>
-            <span id="player-count" style="color:var(--fn-yellow); font-size:1.2rem;">1,420,115</span>
+        <div class="header-stat">
+            <span class="lbl">TOTAL V-BUCKS CIRCULATING</span>
+            <span class="val">14,209,551,000</span>
         </div>
-        <div onclick="toggleServer()" style="cursor:pointer; display:flex; align-items:center; gap:10px; background:#111; padding:5px 15px; border:1px solid #333;">
-            <div id="status-dot" style="width:10px; height:10px; border-radius:50%; background:var(--status-green);"></div>
-            <span id="status-text">SRV_ONLINE</span>
+        <div class="header-stat">
+            <span class="lbl">LIVE CONCURRENT PLAYERS</span>
+            <span id="player-count" class="val">1,850,211</span>
         </div>
     </div>
-    <nav>
-        <button class="nav-btn active" onclick="setTab('reports')">Moderation</button>
-        <button class="nav-btn" onclick="setTab('support')">Support</button>
-        <button class="nav-btn" onclick="setTab('economy')">Economy</button>
-    </nav>
+    <div style="text-align: right;">
+        <span style="color: var(--fn-blue); letter-spacing: 2px;">EPIC_INTERNAL_DASHBOARD</span>
+        <div style="font-size: 0.6rem; color: #444;">SECURE_CONNECTION_STABLE</div>
+    </div>
 </header>
 
+<nav>
+    <button class="nav-btn active" onclick="setTab('mod')">Moderation & Logs</button>
+    <button class="nav-btn" onclick="setTab('econ')">Economy & Gifting</button>
+    <button class="nav-btn" onclick="setTab('creative')">Creative Analytics</button>
+</nav>
+
 <div class="container">
-    <div class="main-panel" id="feed-container">
+    <div class="panel">
+        <div class="panel-header">Regional Infrastructure <span>Health</span></div>
+        <div class="scroll-area" id="ping-monitor">
+            </div>
+        <div style="padding: 10px; background: #000;">
+            <button class="btn btn-yellow" style="font-size: 0.7rem;" onclick="reRouteTraffic()">Re-Route Traffic</button>
         </div>
+    </div>
 
-    <div class="side-panel">
-        <h3 id="side-title">Protocol Logs</h3>
-        <div id="side-content" style="font-size: 0.8rem; font-family: monospace; color: #888;">
-            // Awaiting system input...
-        </div>
-        <div style="margin-top: auto;">
-            <button class="btn-action" style="background:#444; color:white; margin-bottom:5px;" onclick="undo()">UNDO LAST BAN</button>
-            <div style="font-size: 0.6rem; text-align: center; color: #555;">V12.00_RELEGACY_AUTH</div>
+    <div class="panel">
+        <div class="panel-header" id="feed-title">Active Reports Queue</div>
+        <div class="scroll-area" id="main-feed"></div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">Live Market Stats</div>
+        <div class="scroll-area">
+            <div class="data-item">
+                <span class="lbl">TOP PURCHASED (LAST 1H)</span>
+                <span class="val" style="font-size: 0.9rem;">Renegade Lynx (OG Remix)</span>
+            </div>
+            <div class="data-item" style="margin-top: 10px;">
+                <span class="lbl">STORE REVENUE (REAL-TIME)</span>
+                <span class="val" style="color: var(--status-green);">$412,550.00</span>
+            </div>
+            <hr border="0" style="height:1px; background:#222; margin: 15px 0;">
+            <h4 style="margin:0 0 10px 0;">Economy Control</h4>
+            <input type="text" id="gift-user" placeholder="Recipient..." style="width:100%; background:#000; border:1px solid #333; color:white; padding:10px; box-sizing:border-box;">
+            <button class="btn btn-yellow" onclick="notify('Economy Transfer Ready')">Gift V-Bucks/Items</button>
         </div>
     </div>
 </div>
 
-<div id="detail-modal">
+<div id="modal-overlay">
     <div class="modal-box">
-        <h2 id="m-title">Detail View</h2>
-        <p id="m-desc" style="font-family: sans-serif; line-height: 1.4; color: #ccc;"></p>
-        <hr border="1" color="#111">
-        <div id="m-actions"></div>
-        <button onclick="closeModal()" style="background:none; border:none; color:red; cursor:pointer; width:100%; margin-top:20px;">[ CLOSE WINDOW ]</button>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 id="m-user" style="margin:0;">USER_INVESTIGATION</h2>
+            <span id="m-id" style="color:#555; font-size:0.8rem;">#000000</span>
+        </div>
+        
+        <div class="data-grid">
+            <div class="data-item"><span class="lbl">IP ADDRESS</span><span id="m-ip" class="val" style="font-size:0.9rem;">0.0.0.0</span></div>
+            <div class="data-item"><span class="lbl">HARDWARE ID (HWID)</span><span id="m-hwid" class="val" style="font-size:0.9rem;">XXX-XXX-XXX</span></div>
+        </div>
+
+        <div class="chat-log" id="m-chat">
+            </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-red" onclick="execAction('HARD_BAN')">HARD BAN (HWID)</button>
+            <button class="btn btn-purple" onclick="execAction('SHADOW_BAN')">SHADOW BAN</button>
+            <button class="btn" style="background:#333; color:white;" onclick="closeModal()">DISMISS</button>
+        </div>
     </div>
 </div>
 
-<div id="notify"></div>
+<div id="notify-box"></div>
 
 <script>
-    let activeTab = 'reports';
-    let isOnline = true;
-    let playerCount = 1420115;
-    let allItems = [];
-    let selectedItem = null;
-    let history = [];
-
-    // Datasets
-    const reportReasons = {
-        "Cheating": "Detected usage of 3rd party software (Aimbot/ESP) or hardware manipulation (Cronus/XIM).",
-        "Exploiting": "Intentional abuse of map geometry or game mechanics (Under-mapping/Infinite Siphon).",
-        "Harassment": "Repeated targeted toxicity, hate speech, or discriminatory language in Voice/Text.",
-        "Teaming": "Collusion with non-party members in Solo or Ranked environments.",
-        "Griefing": "Intentional sabotage of team members or throwing matches to affect MMR."
-    };
-
-    const supportIssues = {
-        "Payment": "User reports V-Bucks purchased but not credited to account. Transaction ID attached.",
-        "Account": "Request for 2FA reset or suspected unauthorized access from new IP.",
-        "Bug": "User reporting 'white screen' on launch after V40.40 patch update.",
-        "Refund": "Request for accidental purchase return (Token usage requested)."
-    };
-
+    let activeTab = 'mod';
     const names = ["v_Shifted", "TZ_Aqua", "Pure_Logic", "Lxsh_cc", "Parallel_F8", "Cold_Ryz", "Not_Clix"];
+    const chatSamples = [
+        ["User: GGs only", "User: get boxed kid", "User: literal zero earnings"],
+        ["User: I'm laggy", "User: reported for teaming", "User: check my twitch"],
+        ["User: look at this glitch", "User: wallhack enabled lol", "User: kidding"]
+    ];
 
-    // --- Tab Controller ---
     function setTab(t) {
         activeTab = t;
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -145,178 +172,94 @@
     }
 
     function renderFeed() {
-        const cont = document.getElementById('feed-container');
-        cont.innerHTML = "";
-        
-        if(activeTab === 'reports') {
-            cont.innerHTML = "<h3>Live Report Queue</h3>";
-            generateEntries('report');
-        } else if(activeTab === 'support') {
-            cont.innerHTML = "<h3>Pending Help Tickets</h3>";
-            generateEntries('ticket');
-        } else if(activeTab === 'economy') {
-            renderEconomy();
-        }
-    }
+        const feed = document.getElementById('main-feed');
+        const title = document.getElementById('feed-title');
+        feed.innerHTML = "";
 
-    function generateEntries(type) {
-        const cont = document.getElementById('feed-container');
-        for(let i=0; i<8; i++) {
-            const user = names[Math.floor(Math.random()*names.length)] + (Math.random() > 0.5 ? "_OG" : "");
-            const keys = Object.keys(type === 'report' ? reportReasons : supportIssues);
-            const reason = keys[Math.floor(Math.random()*keys.length)];
-            const div = document.createElement('div');
-            div.className = `entry ${type}`;
-            div.innerHTML = `
-                <div class="entry-meta"><span>ID: ${Math.floor(Math.random()*999999)}</span> <span>${new Date().toLocaleTimeString()}</span></div>
-                <div style="display:flex; justify-content:space-between;">
-                    <span>${user}</span>
-                    <span style="color:${type==='report'?'var(--fn-red)':'var(--fn-yellow)'}">${reason}</span>
+        if (activeTab === 'mod') {
+            title.innerText = "Active Reports Queue";
+            for(let i=0; i<10; i++) {
+                const user = names[Math.floor(Math.random()*names.length)] + "_" + Math.floor(Math.random()*99);
+                const isHigh = Math.random() > 0.7;
+                const div = document.createElement('div');
+                div.className = `entry ${isHigh ? 'high-risk' : ''}`;
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>${user}</span>
+                        <span style="color:${isHigh?'var(--fn-red)':'var(--fn-blue)'}">${isHigh?'SUSPECTED_CHEATER':'HARASSMENT'}</span>
+                    </div>
+                `;
+                div.onclick = () => openInvestigation(user);
+                feed.appendChild(div);
+            }
+        } else if (activeTab === 'creative') {
+            title.innerText = "UEFN Creator Analytics";
+            const maps = ["The Pit (Updated)", "Goated Zone Wars", "Crazy Red vs Blue", "Skibidi Tycoon"];
+            feed.innerHTML = maps.map(m => `
+                <div class="entry" style="border-color:var(--fn-purple)">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>${m}</span>
+                        <span style="color:var(--status-green)">+$${Math.floor(Math.random()*5000)} Payout</span>
+                    </div>
+                    <div class="lbl">Active Players: ${Math.floor(Math.random()*50000)}</div>
                 </div>
-            `;
-            div.onclick = () => openDetails(type, user, reason);
-            cont.appendChild(div);
+            `).join('');
         }
     }
 
-    // --- Detail Modal ---
-    function openDetails(type, user, reason) {
-        document.getElementById('detail-modal').style.display = 'flex';
-        document.getElementById('m-title').innerText = `${type.toUpperCase()}: ${user}`;
-        document.getElementById('m-desc').innerText = type === 'report' ? reportReasons[reason] : supportIssues[reason];
+    function openInvestigation(user) {
+        document.getElementById('modal-overlay').style.display = 'flex';
+        document.getElementById('m-user').innerText = user;
+        document.getElementById('m-id').innerText = "#" + Math.floor(Math.random()*900000 + 100000);
+        document.getElementById('m-ip').innerText = `192.168.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+        document.getElementById('m-hwid').innerText = `HWID-${Math.floor(Math.random()*9999)}-${Math.floor(Math.random()*9999)}`;
         
-        const actions = document.getElementById('m-actions');
-        actions.innerHTML = "";
-        if(type === 'report') {
-            actions.innerHTML = `
-                <input type="number" id="ban-hrs" value="72" placeholder="Hours">
-                <button class="btn-action" style="background:var(--fn-red); color:white" onclick="execBan('${user}', '${reason}')">EXECUTE BAN PROTOCOL</button>
-            `;
-        } else {
-            actions.innerHTML = `<button class="btn-action" onclick="resolveTicket('${user}')">RESOLVE & CLOSE TICKET</button>`;
-        }
+        const logs = chatSamples[Math.floor(Math.random()*chatSamples.length)];
+        document.getElementById('m-chat').innerHTML = "<strong>CHRONOLOGICAL CHAT LOGS:</strong><br>" + logs.join("<br>");
     }
 
-    function closeModal() { document.getElementById('detail-modal').style.display = 'none'; }
-
-    // --- Economy / Gifting ---
-    async function renderEconomy() {
-        const cont = document.getElementById('feed-container');
-        cont.innerHTML = `
-            <h3>Economy Control Center</h3>
-            <div style="background:#000; padding:20px; border:2px solid var(--fn-blue);">
-                <label>Recipient Target</label>
-                <input type="text" id="g-target" placeholder="Username (Exact Match)">
-                
-                <label>V-Buck Transfer (Optional)</label>
-                <select id="g-vbucks">
-                    <option value="0">None</option>
-                    <option value="1000">1,000 V-Bucks</option>
-                    <option value="2800">2,800 V-Bucks</option>
-                    <option value="13500">13,500 V-Bucks</option>
-                </select>
-
-                <label>Select Cosmetic (Optional)</label>
-                <input type="text" id="item-search" placeholder="Filter Items..." onkeyup="filterItems()">
-                <div class="gift-grid" id="item-grid">Loading Registry...</div>
-                
-                <button class="btn-action" onclick="sendBundle()">PROCEED WITH BUNDLE GIFT</button>
-            </div>
-        `;
-        if(allItems.length === 0) {
-            const res = await fetch('https://fortnite-api.com/v2/cosmetics/br');
-            const data = await res.json();
-            allItems = data.data;
-        }
-        filterItems();
-    }
-
-    function filterItems() {
-        const term = document.getElementById('item-search')?.value.toLowerCase() || "";
-        const grid = document.getElementById('item-grid');
-        if(!grid) return;
-        const filtered = allItems.filter(i => i.name.toLowerCase().includes(term)).slice(0, 40);
-        grid.innerHTML = filtered.map(i => `
-            <div class="item-card ${selectedItem?.id === i.id ? 'selected' : ''}" onclick="selectItem('${i.id}', '${i.name}', '${i.images.smallIcon}')">
-                <img src="${i.images.smallIcon}">
-                <p>${i.name}</p>
-            </div>
-        `).join('');
-    }
-
-    function selectItem(id, name, img) {
-        selectedItem = {id, name, img};
-        filterItems();
-    }
-
-    function sendBundle() {
-        const target = document.getElementById('g-target').value;
-        const vbucks = document.getElementById('g-vbucks').value;
-        if(!target) return notify("ERROR: Recipient required.");
-        
-        let msg = `Bundle sent to ${target}: `;
-        if(vbucks > 0) msg += `${vbucks} V-Bucks `;
-        if(selectedItem) msg += `+ ${selectedItem.name}`;
-        
-        notify(msg);
-        logAction(`ECONOMY: ${msg}`);
-        selectedItem = null;
-        document.getElementById('g-target').value = "";
-    }
-
-    // --- System Actions ---
-    function execBan(user, reason) {
-        const hrs = document.getElementById('ban-hrs').value;
-        history.push({user, reason, type: 'BAN'});
-        notify(`SUCCESS: ${user} issued ${hrs}h ban for ${reason}.`);
-        logAction(`BAN: ${user} | ${reason} | ${hrs}hrs`);
+    function execAction(type) {
+        const user = document.getElementById('m-user').innerText;
+        notify(`${type} SUCCESS: ${user} isolated.`);
         closeModal();
         renderFeed();
     }
 
-    function undo() {
-        if(history.length === 0) return notify("No actions to revert.");
-        const last = history.pop();
-        notify(`REVERTED: Ban for ${last.user} removed.`);
-        logAction(`UNDO: Reinstated ${last.user}`);
+    function updatePing() {
+        const monitor = document.getElementById('ping-monitor');
+        const regions = ["NA-EAST", "NA-WEST", "EUROPE (FRANKFURT)", "MIDDLE EAST", "ASIA (TOKYO)", "BRAZIL"];
+        monitor.innerHTML = regions.map(r => {
+            const val = Math.floor(Math.random() * 40 + 10);
+            const isHigh = val > 45;
+            return `<div class="ping-item"><span>${r}</span> <span class="ping-val ${isHigh?'ping-high':''}">${val} MS</span></div>`;
+        }).join('');
+        setTimeout(updatePing, 3000);
     }
 
-    function resolveTicket(user) {
-        notify(`Support ticket for ${user} resolved.`);
-        logAction(`SUPPORT: Resolved ${user}`);
-        closeModal();
-        renderFeed();
+    function reRouteTraffic() {
+        notify("RE-ROUTING TRAFFIC... OPTIMIZING CLOUD NODES");
+        setTimeout(() => notify("LATENCY STABILIZED ACROSS ALL REGIONS"), 2000);
     }
 
-    function logAction(msg) {
-        const side = document.getElementById('side-content');
-        side.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>` + side.innerHTML;
-    }
-
+    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
     function notify(m) {
-        const n = document.getElementById('notify');
+        const box = document.getElementById('notify-box');
         const t = document.createElement('div');
         t.className = 'toast'; t.innerText = m;
-        n.appendChild(t);
+        box.appendChild(t);
         setTimeout(() => t.remove(), 4000);
     }
 
-    function toggleServer() {
-        isOnline = !isOnline;
-        document.getElementById('status-dot').style.background = isOnline ? 'var(--status-green)' : 'var(--fn-red)';
-        document.getElementById('status-text').innerText = isOnline ? 'SRV_ONLINE' : 'SRV_CRITICAL';
-        notify(isOnline ? "Services Resumed." : "System Lockdown Engaged.");
-    }
-
-    // Init
+    // Init loops
     setInterval(() => {
-        if(!isOnline) playerCount = Math.max(0, playerCount - 50000);
-        else if(playerCount < 1400000) playerCount += 20000;
-        document.getElementById('player-count').innerText = playerCount.toLocaleString();
-    }, 1000);
+        const count = document.getElementById('player-count');
+        let current = parseInt(count.innerText.replace(/,/g, ''));
+        current += Math.floor(Math.random()*2000 - 1000);
+        count.innerText = current.toLocaleString();
+    }, 2000);
 
+    updatePing();
     renderFeed();
 </script>
-
 </body>
 </html>
